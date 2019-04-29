@@ -11,7 +11,8 @@ class UsersController < ApplicationController
   def create
     auth_hash = request.env["omniauth.auth"]
 
-    user = User.find_by(uid: auth_hash[:uid], provider: "github")
+    user = User.find_by(uid: auth_hash[:uid], provider: auth_hash[:provider])
+
     if user
       # User was found in the database
       flash[:status] = :success
@@ -37,7 +38,6 @@ class UsersController < ApplicationController
         return redirect_to root_path
       end
     end
-
     # If we get here, we have a valid user instance
     session[:user_id] = user.id
     return redirect_to root_path
