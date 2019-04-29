@@ -1,3 +1,4 @@
+
 class UsersController < ApplicationController
   def index
     @users = User.all
@@ -67,8 +68,10 @@ class UsersController < ApplicationController
     end
 
     # If we get here, we have a valid user instance
+  
     session[:user_id] = user.id
     return redirect_to root_path
+
   end
 
   def destroy
@@ -77,6 +80,6 @@ class UsersController < ApplicationController
 
     redirect_to root_path
   end
-  
+
 
 end
