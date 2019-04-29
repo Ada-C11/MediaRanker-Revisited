@@ -36,10 +36,7 @@
         <% if @login_user %>
 
         <li class="nav-item app-header__nav_item">
-          <%= link_to "Logged in as #{@login_user.email}", user_path(@login_user), class: "btn btn-primary" %>
-        </li>
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "Log out", logout_path, method: "delete", class: "btn btn-primary" %>
+          <%= link_to "You are logged in as #{@login_user.email}, wanna Log out?", logout_path, method: "delete", class: "btn btn-primary" %>
         </li>
 
         <% else %>
