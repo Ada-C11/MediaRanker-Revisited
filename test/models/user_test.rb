@@ -23,7 +23,8 @@ describe User do
     it "requires a username" do
       user = User.new
       user.valid?.must_equal false
-      user.errors.messages.must_include :username
+      user.errors.messages.must_include :uid
+      user.errors.messages.must_include :provider
     end
 
     it "requires a unique username" do
