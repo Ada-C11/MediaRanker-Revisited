@@ -33,7 +33,7 @@ describe UsersController do
     it "redirects to the login route if given invalid user data" do
     end
 
-    it "logs out a user" do
+    it "logs out a logged-in user" do
       start_count = User.count
       user = users(:grace)
 
@@ -43,10 +43,20 @@ describe UsersController do
 
       must_redirect_to root_path
 
-      # Should have created a new user
       User.count.must_equal start_count
 
-      # The new user's ID should be set in the session
+      session[:user_id].must_equal nil
+    end
+
+    it "does nothing if no user is logged in" do
+      start_count = User.count
+
+      delete logout_path
+
+      must_redirect_to root_path
+
+      User.count.must_equal start_count
+
       session[:user_id].must_equal nil
     end
   end
