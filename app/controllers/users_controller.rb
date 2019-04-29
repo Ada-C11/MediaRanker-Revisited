@@ -8,11 +8,7 @@ class UsersController < ApplicationController
     render_404 unless @user
   end
 
-  # def login_form
-  # end
-
   def create
-    # raise
     auth_hash = request.env["omniauth.auth"]
     user = User.find_by(uid: auth_hash[:uid], provider: "github")
 
@@ -43,12 +39,4 @@ class UsersController < ApplicationController
     flash[:result_text] = "Successfully logged out"
     redirect_to root_path
   end
-
-  # def logout
-  #   session[:user_id] = nil
-  #   flash[:status] = :success
-  #   flash[:result_text] = "Successfully logged out"
-  #   redirect_to root_path
-  # end
-
 end
