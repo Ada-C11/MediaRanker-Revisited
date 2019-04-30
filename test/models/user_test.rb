@@ -1,33 +1,33 @@
-require "test_helper"
+require 'test_helper'
 
 describe User do
-  describe "relations" do
-    it "has a list of votes" do
-      dan = users(:dan)
-      dan.must_respond_to :votes
-      dan.votes.each do |vote|
+  describe 'relations' do
+    it 'has a list of votes' do
+      ada = users(:ada)
+      ada.must_respond_to :votes
+      ada.votes.each do |vote|
         vote.must_be_kind_of Vote
       end
     end
 
-    it "has a list of ranked works" do
-      dan = users(:dan)
-      dan.must_respond_to :ranked_works
-      dan.ranked_works.each do |work|
+    it 'has a list of ranked works' do
+      ada = users(:ada)
+      ada.must_respond_to :ranked_works
+      ada.ranked_works.each do |work|
         work.must_be_kind_of Work
       end
     end
   end
 
-  describe "validations" do
-    it "requires a username" do
+  describe 'validations' do
+    it 'requires a username' do
       user = User.new
       user.valid?.must_equal false
       user.errors.messages.must_include :username
     end
 
-    it "requires a unique username" do
-      username = "test username"
+    it 'requires a unique username' do
+      username = 'test username'
       user1 = User.new(username: username)
 
       # This must go through, so we use create!
