@@ -15,4 +15,12 @@ class ApplicationController < ActionController::Base
       @login_user = User.find_by(id: session[:user_id])
     end
   end
+
+  def require_login
+    @login_user = User.find_by(id: session[:user_id])
+    if @login_user.nil?
+      flash[:error] = "You must be logged in to do this action"
+      redirect_to work_path(@work)
+    end
+  end
 end

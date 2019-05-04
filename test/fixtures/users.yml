@@ -6,6 +6,9 @@ ada:
   name: countess_ada
 
 dan:
+  provider: github
+  uid: 775869483
+  email: dan@adadevelopersacademy.org
   name: dan
 
 grace:
@@ -15,4 +18,7 @@ grace:
   name: graceful_hopps
 
 kari:
+  provider: github
+  uid: 12398123
+  email: kari@adadevelopersacademy.org
   name: kari
