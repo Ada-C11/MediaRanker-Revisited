@@ -11,17 +11,9 @@ describe UsersController do
       # Get a user from the fixtures
       user = users(:grace)
 
-      # Tell OmniAuth to use this user's info when it sees
-      # an auth callback from github
-      OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
-
-      # Send a login request for that user
-      # Note that we're using the named path for the callback, as defined
-      # in the `as:` clause in `config/routes.rb`
-      get auth_callback_path(:github)
+      perform_login(user)
 
       must_redirect_to root_path
-
       # Since we can read the session, check that the user ID was set as expected
       session[:user_id].must_equal user.id
 
@@ -33,11 +25,8 @@ describe UsersController do
       start_count = User.count
       user1 = User.new(provider: 'github', uid: 99_999, username: 'camille', email: 'test@user.com')
 
-      OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user1))
+      perform_login(user1)
 
-      get github_login_path
-      get auth_callback_path(:github)
-      
       must_redirect_to root_path
 
       # Should have created a new user
