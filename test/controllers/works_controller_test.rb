@@ -32,20 +32,32 @@ describe WorksController do
   INVALID_CATEGORIES = ['nope', '42', '', '  ', 'albumstrailingtext'].freeze
 
   describe 'index' do
-    it 'succeeds when there are works' do
-      get works_path
+    describe "logged in users" do
+      it 'succeeds when there are works' do
+        perform_login
+        get works_path
 
-      must_respond_with :success
+        must_respond_with :success
+      end
+
+      it 'succeeds when there are no works' do
+        perform_login
+        Work.all(&:destroy)
+
+        get works_path
+
+        must_respond_with :success
+      end
     end
 
-    it 'succeeds when there are no works' do
-      Work.all(&:destroy)
-
+  describe "logged out users" do
+    it 'redirects to the root_path if the user is not logged in' do
       get works_path
 
-      must_respond_with :success
+      must_redirect_to root_path
     end
   end
+end
 
   describe 'new' do
     it 'succeeds' do
@@ -92,19 +104,32 @@ describe WorksController do
   end
 
   describe 'show' do
-    it 'succeeds for an extant work ID' do
-      get work_path(existing_work.id)
 
-      must_respond_with :success
+    describe "logged in users" do
+      it 'succeeds for an extant work ID' do
+        perform_login
+        get work_path(existing_work.id)
+
+        must_respond_with :success
+      end
+
+      it 'renders 404 not_found for a bogus work ID' do
+        perform_login
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
 
-    it 'renders 404 not_found for a bogus work ID' do
-      destroyed_id = existing_work.id
-      existing_work.destroy
+    describe "logged out users" do 
+      it 'redirects to the root path if a user is not logged in' do
+        get work_path(existing_work.id)
 
-      get work_path(destroyed_id)
-
-      must_respond_with :not_found
+        must_redirect_to root_path
+      end
     end
   end
 
