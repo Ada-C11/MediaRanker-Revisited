@@ -37,4 +37,17 @@ class ActiveSupport::TestCase
       },
     }
   end
+
+  def perform_login(user = nil)
+    user ||= users(:kari)
+
+    OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
+
+    get auth_callback_path(:github)
+
+    must_respond_with :redirect
+    must_redirect_to root_path
+
+    return user
+  end
 end

@@ -63,8 +63,8 @@ class WorksController < ApplicationController
 
   def upvote
     flash[:status] = :failure
-    if @login_user
-      vote = Vote.new(user: @login_user, work: @work)
+    if @current_user
+      vote = Vote.new(user: @current_user, work: @work)
       if vote.save
         flash[:status] = :success
         flash[:result_text] = "Successfully upvoted!"
