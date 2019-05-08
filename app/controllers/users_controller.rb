@@ -34,6 +34,11 @@ class UsersController < ApplicationController
     redirect_to root_path
   end
 
+  def create
+    auth_hash = request.env["omniauth.auth"]
+    raise
+  end
+
   def logout
     session[:user_id] = nil
     flash[:status] = :success
