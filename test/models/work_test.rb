@@ -81,10 +81,11 @@ describe Work do
     end
 
     it "tracks the number of votes" do
-      work = Work.create!(title: "test title", category: "movie")
+      work = Work.create!(title: "test title1", category: "movie")
       4.times do |i|
         user = User.create!(username: "user#{i}")
-        Vote.create!(user: user, work: work)
+        puts user.id
+        Vote.create!(user_id: user.id, work: work)
       end
       work.vote_count.must_equal 4
       Work.find(work.id).vote_count.must_equal 4

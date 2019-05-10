@@ -20,15 +20,17 @@ class UsersController < ApplicationController
       # User doesn't match anything in the DB
       # Attempt to create a new user
       user = User.build_from_github(auth_hash)
-
-      if user.save
+      successful = user.save
+      
+      if successful
         flash[:status] = :success
         flash[:message] = "Logged in as new user #{user.name}"
       else
         # Couldn't save the user for some reason
         flash[:status] = :error
         flash[:message] = "Could not create new user account: #{user.errors.messages}"
-        return redirect_to root_path
+        redirect_to root_path
+        return
       end
     end
 
