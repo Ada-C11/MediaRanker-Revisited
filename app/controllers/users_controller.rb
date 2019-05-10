@@ -36,13 +36,51 @@ class UsersController < ApplicationController
 
   def create
     auth_hash = request.env["omniauth.auth"]
-    raise
+    user = User.find_by(uid: auth_hash[:uid], provider: "github")
+    if user
+      # User was found in the database
+      flash[:status] = :success
+      flash[:result_text] = "Logged in as returning user #{user.name}"
+    else
+      # User doesn't match anything in the DB
+      # Attempt to create a new user
+      user = User.build_from_github(auth_hash)
+      # raise
+
+      if user.save
+        flash[:status] = :success
+        flash[:result_message] = "Logged in as new user #{user.name}"
+      else
+        # Couldn't save the user for some reason. If we
+        # hit this it probably means there's a bug with the
+        # way we've configured GitHub. Our strategy will
+        # be to display error messages to make future
+        # debugging easier.
+        # raise
+        flash[:status] = :error
+        flash[:result_text] = "Could not create new user account"
+        flash[:messages] = user.errors.messages
+        return redirect_to root_path
+      end
+    end
+
+    # If we get here, we have a valid user instance
+    session[:user_id] = user.id
+    return redirect_to root_path
   end
 
-  def logout
+  # def logout # can I get rid of this?
+  #   session[:user_id] = nil
+  #   flash[:status] = :success
+  #   flash[:result_text] = "Successfully logged out"
+  #   redirect_to root_path
+  # end
+
+  def destroy # Get rid of log out and keep this
     session[:user_id] = nil
     flash[:status] = :success
     flash[:result_text] = "Successfully logged out"
+
     redirect_to root_path
   end
 end
