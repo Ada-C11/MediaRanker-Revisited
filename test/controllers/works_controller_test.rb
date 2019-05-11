@@ -34,20 +34,35 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
-      get works_path
+    describe "logged in user" do
+      it "succeeds when there are works" do
+        perform_login
+        get works_path
 
-      must_respond_with :success
-    end
-
-    it "succeeds when there are no works" do
-      Work.all do |work|
-        work.destroy
+        must_respond_with :success
       end
 
-      get works_path
+      it "succeeds when there are no works" do
+        perform_login
+        Work.all do |work|
+          work.destroy
+        end
 
-      must_respond_with :success
+        get works_path
+
+        must_respond_with :success
+      end
+    end
+    describe "logged out user" do
+      it "redirects to home page and shows flash msg" do
+        get works_path
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must login to view this page"
+      end
     end
   end
 
@@ -96,19 +111,34 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
-      get work_path(existing_work.id)
+    describe "logged in user" do
+      it "succeeds for an extant work ID" do
+        perform_login
+        get work_path(existing_work.id)
 
-      must_respond_with :success
+        must_respond_with :success
+      end
+
+      it "renders 404 not_found for a bogus work ID" do
+        perform_login
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      destroyed_id = existing_work.id
-      existing_work.destroy
+    describe "logged out user" do
+      it "redirects to the root pagae" do
+        get work_path(existing_work.id)
 
-      get work_path(destroyed_id)
-
-      must_respond_with :not_found
+        must_respond_with :redirect
+        must_redirect_to root_path
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must login to view this page"
+      end
     end
   end
 
