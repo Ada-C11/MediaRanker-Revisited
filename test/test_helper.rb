@@ -1,3 +1,5 @@
+require "simplecov"
+SimpleCov.start "rails"
 ENV["RAILS_ENV"] = "test"
 require File.expand_path("../../config/environment", __FILE__)
 require "rails/test_help"
@@ -23,4 +25,27 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
   # Add more helper methods to be used by all tests here...
+  OmniAuth.config.test_mode = true
+
+  def mock_auth_hash(user)
+    return {
+             provider: user.provider,
+             uid: user.uid,
+             info: {
+               email: user.email,
+               username: user.email,
+             },
+           }
+  end
+
+  def perform_login(user = nil)
+    user ||= users(:dan)
+
+    OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
+    get auth_callback_path(:github)
+
+    must_respond_with :redirect
+    must_redirect_to root_path
+    return user
+  end
 end
