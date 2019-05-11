@@ -215,7 +215,15 @@ describe WorksController do #
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      before_vote = @work.votes.count
+      perform_login(@user)
+      expect(session[:user_id]).must_equal @user.id
+
+      post upvote_path(@work)
+      expect(Vote.count).must_equal @start_count + 1
+      expect(@work.votes.count).must_equal before_vote + 1
+
+      must_redirect_to work_path(@work)
     end
 
     it "redirects to the work page if the user has already voted for that work" do
