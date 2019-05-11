@@ -65,7 +65,12 @@ describe WorksController do
     end
 
     it "sends a guest user to the root path with an error message" do
-      #TODO
+      get works_path
+
+      expect(flash[:status]).must_equal :error
+      expect(flash[:message]).wont_be_nil
+
+      must_redirect_to root_path
     end
 
     it "works for a logged in user" do
