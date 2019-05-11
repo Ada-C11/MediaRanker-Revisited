@@ -32,11 +32,12 @@ class ActiveSupport::TestCase
 
   def mock_auth_hash(user)
     return {
-      provider: user.oauth_provider,
-      uid: user.oauth_uid,
+      provider: user.provider,
+      uid: user.uid,
       info: {
         email: user.email,
-        nickname: user.username
+        nickname: user.name,
+        name: user.username
       }
     }
   end

@@ -9,7 +9,7 @@ dan:
 
 kari:
   username: kari
-  emaik: kari@adadev.org
+  email: kari@adadev.org
   name: Kari Something
   uid: 1234561
   provider: github
