@@ -226,6 +226,8 @@ describe WorksController do
         post upvote_path(existing_work.id)
       }.wont_change "Vote.count"
       must_redirect_to root_path
+      flash[:status].must_equal :failure
+      flash[:result_text].must_equal 'You must be logged in to perform this action'
     end
   end
 end
