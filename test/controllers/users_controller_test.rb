@@ -30,6 +30,15 @@ describe UsersController do
     end
 
     it "redirects to different route if given invalid user data" do
+      user = User.new(
+        provider: "bogus",
+        uid: "bogus",
+        username: "",
+      )
+
+      perform_login(user)
+      flash[:error].wont_be_nil
+      must_redirect_to root_path
     end
   end
 end
