@@ -189,23 +189,29 @@ describe WorksController do #
 
   describe "upvote" do
     before do
-      @user = perform_login(@user)
+      @user = users(:dan)
       @work = Work.first
       @start_count = Vote.count
     end
     it "redirects to the work page if no user is logged in" do
-      delete logout_path
-      expect(session[:user_id]).must_be_nil
-
       post upvote_path(@work)
-
       expect(flash[:result_text]).wont_be_nil
       expect(@start_count).must_equal Vote.count
+
       must_redirect_to work_path(@work)
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login(@user)
+      expect(session[:user_id]).must_equal @user.id
+      delete logout_path
+      expect(session[:user_id]).must_equal nil
+
+      post upvote_path(@work)
+      expect(flash[:result_text]).wont_be_nil
+      expect(@start_count).must_equal Vote.count
+
+      must_redirect_to work_path(@work)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
