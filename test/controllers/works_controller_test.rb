@@ -119,7 +119,11 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
+    before do
+      @user = users(:dan)
+    end
+    it "succeeds for a logged in user with an extant work ID" do
+      perform_login(@user)
       get work_path(existing_work.id)
 
       must_respond_with :success

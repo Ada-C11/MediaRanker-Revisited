@@ -39,6 +39,12 @@ class WorksController < ApplicationController
   end
 
   def show
+    unless session[:user_id]
+      flash[:status] = :error
+      flash[:message] = "You need to log in first."
+      redirect_to root_path
+    end
+
     @votes = @work.votes.order(created_at: :desc)
   end
 
