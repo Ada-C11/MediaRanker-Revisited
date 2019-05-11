@@ -37,8 +37,24 @@ describe UsersController do
       )
 
       perform_login(user)
-      flash[:error].wont_be_nil
+      expect(flash[:error]).wont_be_nil
       must_redirect_to root_path
+    end
+  end
+
+  describe "destroy" do
+    before do
+      @user = users(:dan)
+      perform_login(@user)
+    end
+    it "successfully logs out a user" do
+      expect(session[:user_id]).must_equal @user.id
+
+      delete logout_path
+
+      expect(session[:user_id]).must_be_nil
+      must_redirect_to root_path
+      expect(flash[:success]).wont_be_nil
     end
   end
 end
