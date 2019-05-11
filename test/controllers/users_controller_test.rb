@@ -8,12 +8,8 @@ describe UsersController do
     it "logs in an existing user" do
       user = users(:dan)
 
-      OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
-
-      get auth_callback_path(:github)
-
+      perform_login(user)
       must_redirect_to root_path
-
       session[:user_id].must_equal user.id
 
       User.count.must_equal @start_count
@@ -26,13 +22,10 @@ describe UsersController do
         username: "fishy",
       )
 
-      OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
-      get auth_callback_path(:github)
-
+      perform_login(user)
       must_redirect_to root_path
 
       User.count.must_equal @start_count + 1
-
       session[:user_id].must_equal User.last.id
     end
 
