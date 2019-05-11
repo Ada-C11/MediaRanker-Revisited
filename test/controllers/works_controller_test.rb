@@ -43,13 +43,18 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
+    before do
+      @user = users(:dan)
+    end
     it "succeeds when there are works" do
+      perform_login(@user)
       get works_path
 
       must_respond_with :success
     end
 
     it "succeeds when there are no works" do
+      perform_login(@user)
       Work.all do |work|
         work.destroy
       end
