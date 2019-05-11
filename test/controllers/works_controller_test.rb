@@ -204,7 +204,16 @@ describe WorksController do
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      start_count = User.count
+      user = users(:grace)
+
+      perform_login(user)
+
+      delete logout_path
+
+      must_redirect_to works_path
+
+      session[:user_id].must_equal nil
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do

@@ -4,6 +4,8 @@ require "rails/test_help"
 require "minitest/rails"
 require "minitest/skip_dsl"
 require "minitest/reporters"  # for Colorized output
+require "simplecov"
+SimpleCov.start
 
 #  For colorful output!
 Minitest::Reporters.use!(
