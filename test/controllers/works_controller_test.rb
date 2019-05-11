@@ -46,14 +46,14 @@ describe WorksController do
     before do
       @user = users(:dan)
     end
-    it "succeeds when there are works" do
+    it "succeeds for a logged in user when there are works" do
       perform_login(@user)
       get works_path
 
       must_respond_with :success
     end
 
-    it "succeeds when there are no works" do
+    it "succeeds for a logged in user when there are no works" do
       perform_login(@user)
       Work.all do |work|
         work.destroy
@@ -71,9 +71,6 @@ describe WorksController do
       expect(flash[:message]).wont_be_nil
 
       must_redirect_to root_path
-    end
-
-    it "works for a logged in user" do
     end
   end
 
