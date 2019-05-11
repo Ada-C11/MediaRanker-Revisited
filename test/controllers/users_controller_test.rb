@@ -52,4 +52,15 @@ describe UsersController do
       session[:user_id].must_equal nil
     end
   end
+
+  describe "guest user" do
+    it "cannot access users index page " do
+      get users_path
+
+      must_respond_with :redirect
+      must_redirect_to root_path
+      flash[:status].must_equal :failure
+      flash[:result_text].must_equal 'You must be logged in to perform this action'
+    end
+  end
 end
