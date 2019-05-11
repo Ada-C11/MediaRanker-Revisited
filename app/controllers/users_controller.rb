@@ -40,7 +40,7 @@ class UsersController < ApplicationController
     if user
       # User was found in the database
       flash[:status] = :success
-      flash[:result_text] = "Logged in as returning user #{user.name}"
+      flash[:result_text] = "Logged in as returning user #{user.username}"
     else
       # User doesn't match anything in the DB
       # Attempt to create a new user
@@ -49,7 +49,7 @@ class UsersController < ApplicationController
 
       if user.save
         flash[:status] = :success
-        flash[:result_message] = "Logged in as new user #{user.name}"
+        flash[:result_message] = "Logged in as new user #{user.username}"
       else
         # Couldn't save the user for some reason. If we
         # hit this it probably means there's a bug with the
