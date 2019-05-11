@@ -49,7 +49,7 @@ describe UsersController do
       user = User.find_by(uid: new_user.uid, provider: new_user.provider)
 
       expect(session[:user_id]).must_equal user.id
-      expect(new_user.name).must_equal user.username
+      expect(new_user.name).must_equal user.name
       expect(flash[:status]).must_equal :success
     end
   end

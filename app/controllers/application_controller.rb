@@ -8,10 +8,6 @@ class ApplicationController < ActionController::Base
     raise ActionController::RoutingError.new("Not Found")
   end
 
-  def find_user
-    @current_user = User.find_by(id: session[:user_id])
-  end
-
   def require_login
     current_user = find_user
 
@@ -21,11 +17,11 @@ class ApplicationController < ActionController::Base
     end
   end
   
-  # private
+  private
 
-  # def find_user
-  #   if session[:user_id]
-  #     @login_user = User.find_by(id: session[:user_id])
-  #   end
-  # end
+  def find_user
+    if session[:user_id]
+      @login_user = User.find_by(id: session[:user_id])
+    end
+  end
 end

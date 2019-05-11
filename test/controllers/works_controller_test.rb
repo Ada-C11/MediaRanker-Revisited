@@ -35,12 +35,14 @@ describe WorksController do
 
   describe "index" do
     it "succeeds when there are works" do
+      perform_login
       get works_path
 
       must_respond_with :success
     end
 
     it "succeeds when there are no works" do
+      perform_login
       Work.all do |work|
         work.destroy
       end
@@ -48,6 +50,18 @@ describe WorksController do
       get works_path
 
       must_respond_with :success
+    end
+  end
+
+  describe "logged out user" do
+    it "redirects to homepage and flashes a message" do
+      get work_path(existing_work.id)
+
+      must_respond_with :redirect
+      must_redirect_to root_path
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must login to view this page"
     end
   end
 
@@ -97,12 +111,14 @@ describe WorksController do
 
   describe "show" do
     it "succeeds for an extant work ID" do
+      perform_login
       get work_path(existing_work.id)
 
       must_respond_with :success
     end
 
     it "renders 404 not_found for a bogus work ID" do
+      perform_login
       destroyed_id = existing_work.id
       existing_work.destroy
 
@@ -189,13 +205,8 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      # skip
-      work = works(:poodr)
-      get work_path(work.id)
-
-      user = users(:dan)
-      delete logout_path
-      expect(session[:user_id]).must_be_nil
+      
+      work = works(:album)
 
       expect{ 
         post upvote_path(work.id) 
@@ -203,30 +214,31 @@ describe WorksController do
 
       must_respond_with :redirect
       must_redirect_to work_path(work.id)
-
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
     end
 
     it "redirects to the work page after the user has logged out" do
       # skip
-      user = perform_login(users(:dan))
-      work = works(:album)
-      expect(session[:user_id]).must_equal user.id
-
-      get work_path(work.id)
+      perform_login
 
       delete logout_path
-      expect(session[:user_id]).must_be_nil
+
+      work = works(:album)
+
+      expect{
+        post upvote_path(work.id)
+      }.wont_change "Vote.count", 1
+
       must_respond_with :redirect
-      must_redirect_to root_path
-
-
+      must_redirect_to work_path(work.id)
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      # skip
-        user = perform_login(users(:dan))
 
-        expect(session[:user_id]).must_equal user.id
+        perform_login
 
         work = works(:movie)
 
@@ -236,19 +248,30 @@ describe WorksController do
 
         must_respond_with :redirect
         must_redirect_to work_path(work.id)
+        expect(flash[:status]).must_equal :success
+        expect(flash[:result_text]).must_equal "Successfully upvoted!"
     end
 
     it "redirects to the work page if the user has already voted for that work" do
       # skip
-      user = perform_login(users(:dan))
-      expect(session[:user_id]).must_equal user.id
+      perform_login
+
       work = works(:album)
+
       expect{ 
         post upvote_path(work.id) 
       }.wont_change "Vote.count"
 
       must_respond_with :redirect
       must_redirect_to work_path(work.id)
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "Could not upvote"
+      
+      flash[:messages].each do |key, value|
+        if key == :user
+          expect(value).must_equal ["has already voted for this work"]
+        end
+      end
 
     end
   end

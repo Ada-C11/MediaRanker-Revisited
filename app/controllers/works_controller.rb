@@ -11,7 +11,15 @@ class WorksController < ApplicationController
   end
 
   def index
-    @works_by_category = Work.to_category_hash
+    # access to the index page should be redirected to the main page with an error message
+    if @login_user
+      @works_by_category = Work.to_category_hash
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to view this page"
+      
+      redirect_to root_path
+    end
   end
 
   def new
@@ -34,7 +42,15 @@ class WorksController < ApplicationController
   end
 
   def show
-    @votes = @work.votes.order(created_at: :desc)
+    # access to the show page for any work should be redirected to the main page with an error message
+    if @login_user
+      @votes = @work.votes.order(created_at: :desc)
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must login to view this page"
+      
+      redirect_to root_path
+    end
   end
 
   def edit
@@ -63,8 +79,8 @@ class WorksController < ApplicationController
 
   def upvote
     flash[:status] = :failure
-    if @current_user
-      vote = Vote.new(user: @current_user, work: @work)
+    if @login_user
+      vote = Vote.new(user: @login_user, work: @work)
       if vote.save
         flash[:status] = :success
         flash[:result_text] = "Successfully upvoted!"

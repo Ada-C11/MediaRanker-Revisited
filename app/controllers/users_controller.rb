@@ -5,9 +5,7 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find_by(id: params[:id])
-    if @user.nil?
-      head :not_found
-    end
+    render_404 unless @user
   end
 
   def create
@@ -24,7 +22,8 @@ class UsersController < ApplicationController
         flash[:status] = :success
         flash[:result_text] = "Logged in as new user #{user.name}"
       else
-        flash[:error] = "Could not create new user account: #{user.errors.messages}"
+        flash[:status] = :error
+        flash[:result_text] = "Could not create new user account: #{user.errors.messages}"
         return redirect_to root_path
       end
     end
@@ -48,4 +47,6 @@ class UsersController < ApplicationController
 
     redirect_to root_path
   end
+
+  private 
 end
