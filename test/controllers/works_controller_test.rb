@@ -4,29 +4,61 @@ describe WorksController do
   let(:existing_work) { works(:album) }
 
   describe "root" do
-    it "succeeds with all media types" do
-      get root_path
-
-      must_respond_with :success
-    end
-
-    it "succeeds with one media type absent" do
-      only_book = works(:poodr)
-      only_book.destroy
-
-      get root_path
-
-      must_respond_with :success
-    end
-
-    it "succeeds with no media" do
-      Work.all do |work|
-        work.destroy
+    describe "logged-in user" do
+      before do
+        perform_login
       end
 
-      get root_path
+      it "succeeds with all media types" do
+        get root_path
 
-      must_respond_with :success
+        must_respond_with :success
+      end
+
+      it "succeeds with one media type absent" do
+        only_book = works(:poodr)
+        only_book.destroy
+
+        get root_path
+
+        must_respond_with :success
+      end
+
+      it "succeeds with no media" do
+        Work.all do |work|
+          work.destroy
+        end
+
+        get root_path
+
+        must_respond_with :success
+      end
+    end
+    describe "logged-out user" do
+      it "succeeds with all media types" do
+        get root_path
+
+        must_respond_with :success
+      end
+
+      it "succeeds with one media type absent" do
+        only_book = works(:poodr)
+        only_book.destroy
+
+        get root_path
+
+        must_respond_with :success
+      end
+
+      it "succeeds with no media" do
+        Work.all do |work|
+          work.destroy
+        end
+
+        get root_path
+
+        must_respond_with :success
+      end
     end
   end
 
@@ -34,20 +66,51 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
-      get works_path
+    describe "logged-in user" do
+      before do
+        perform_login
+      end
+      it "succeeds when there are works" do
+        get works_path
 
-      must_respond_with :success
-    end
-
-    it "succeeds when there are no works" do
-      Work.all do |work|
-        work.destroy
+        must_respond_with :success
       end
 
-      get works_path
+      it "succeeds when there are no works" do
+        Work.all do |work|
+          work.destroy
+        end
 
-      must_respond_with :success
+        get works_path
+
+        must_respond_with :success
+      end
+    end
+
+    describe "non-logged-in user" do
+      it "redirects and flashes failure when there are works" do
+        get works_path
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to see this page"
+      end
+
+      it "redirects and flashes failure when there are no works" do
+        Work.all do |work|
+          work.destroy
+        end
+
+        get works_path
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to see this page"
+      end
     end
   end
 
@@ -96,19 +159,45 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
-      get work_path(existing_work.id)
+    describe "logged-in user" do
+      before do
+        perform_login
+      end
+      it "succeeds for an extant work ID" do
+        get work_path(existing_work.id)
 
-      must_respond_with :success
+        must_respond_with :success
+      end
+
+      it "renders 404 not_found for a bogus work ID" do
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      destroyed_id = existing_work.id
-      existing_work.destroy
+    describe "non-logged-in user" do
+      it "redirects and flashes failure for an extant work ID" do
+        get work_path(existing_work.id)
 
-      get work_path(destroyed_id)
+        must_respond_with :redirect
+        must_redirect_to root_path
 
-      must_respond_with :not_found
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to see this page"
+      end
+
+      it "renders 404 not_found for a bogus work ID" do
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
   end
 

@@ -32,7 +32,7 @@ class UsersController < ApplicationController
         # way we've configured GitHub. Our strategy will
         # be to display error messages to make future
         # debugging easier.
-        flash[:status] = :error # or failure?
+        flash[:status] = :failure # or failure?
         flash[:result_text] = "Could not create new user account: #{user.errors.messages}"
         flash[:messages] = @work.errors.messages
         redirect_to root_path
