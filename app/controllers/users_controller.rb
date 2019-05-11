@@ -8,55 +8,18 @@ class UsersController < ApplicationController
     render_404 unless @user
   end
 
-  # def login_form
-  # end
-
-  # def login
-  #   username = params[:username]
-  #   if username and user = User.find_by(username: username)
-  #     session[:user_id] = user.id
-  #     flash[:status] = :success
-  #     flash[:result_text] = "Successfully logged in as existing user #{user.username}"
-  #   else
-  #     user = User.new(username: username)
-  #     if user.save
-  #       session[:user_id] = user.id
-  #       flash[:status] = :success
-  #       flash[:result_text] = "Successfully created new user #{user.username} with ID #{user.id}"
-  #     else
-  #       flash.now[:status] = :failure
-  #       flash.now[:result_text] = "Could not log in"
-  #       flash.now[:messages] = user.errors.messages
-  #       render "login_form", status: :bad_request
-  #       return
-  #     end
-  #   end
-  #   redirect_to root_path
-  # end
-
   def create
     auth_hash = request.env["omniauth.auth"]
     user = User.find_by(uid: auth_hash[:uid], provider: "github")
-    if user
-      # User was found in the database
+    if user # User was found in the db
       flash[:status] = :success
       flash[:result_text] = "Logged in as returning user #{user.username}"
-    else
-      # User doesn't match anything in the DB
-      # Attempt to create a new user
+    else # User not in db
       user = User.build_from_github(auth_hash)
-      # raise
-
       if user.save
         flash[:status] = :success
         flash[:result_message] = "Logged in as new user #{user.username}"
       else
-        # Couldn't save the user for some reason. If we
-        # hit this it probably means there's a bug with the
-        # way we've configured GitHub. Our strategy will
-        # be to display error messages to make future
-        # debugging easier.
-        # raise
         flash[:status] = :error
         flash[:result_text] = "Could not create new user account"
         flash[:messages] = user.errors.messages
@@ -69,14 +32,7 @@ class UsersController < ApplicationController
     return redirect_to root_path
   end
 
-  # def logout # can I get rid of this?
-  #   session[:user_id] = nil
-  #   flash[:status] = :success
-  #   flash[:result_text] = "Successfully logged out"
-  #   redirect_to root_path
-  # end
-
-  def destroy # Get rid of log out and keep this
+  def destroy
     session[:user_id] = nil
     flash[:status] = :success
     flash[:result_text] = "Successfully logged out"
