@@ -19,12 +19,24 @@ describe UsersController do
   end
 
   describe "show" do 
-    it " " do 
+    it "loads the user show page for existant user" do 
+      dan_user = users(:dan)
 
+      get user_path(dan_user)
+
+      must_respond_with :ok
+    end
+
+    it "redirects for nonextant user" do 
+      invalid_id = User.last.id + 1
+
+      get user_path(invalid_id)
+
+      must_respond_with :not_found
     end
   end
 
-  describe "auth_callback" do
+  describe "create (auth_callback)" do
     it "logs in an existing user and redirects to the root route" do
       # Count the users, to make sure we're not (for example) creating
       # a new user every time we get a login request
