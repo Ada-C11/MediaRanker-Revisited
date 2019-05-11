@@ -25,13 +25,13 @@ class ActiveSupport::TestCase
   # Add more helper methods to be used by all tests here...
 
   def setup
-    OmniAuth.config.test_most = true
+    OmniAuth.config.test_mode = true
   end
 
   def mock_auth_hash(user)
     return {
-             provider: user.oauth_provider,
-             uid: user.oauth_uid,
+             provider: user.provider,
+             uid: user.uid,
              info: {
                email: user.email,
                nickname: user.username,
