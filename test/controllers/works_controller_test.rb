@@ -1,6 +1,6 @@
 require "test_helper"
 
-describe WorksController do #
+describe WorksController do
   let(:existing_work) { works(:album) }
 
   describe "root" do
@@ -28,6 +28,15 @@ describe WorksController do #
 
       must_respond_with :success
     end
+
+    it "renders even if a user isn't logged in" do
+      delete logout_path
+      expect(session[:user_id]).must_equal nil
+
+      get root_path
+
+      must_respond_with :success
+    end
   end
 
   CATEGORIES = %w(albums books movies)
@@ -48,6 +57,13 @@ describe WorksController do #
       get works_path
 
       must_respond_with :success
+    end
+
+    it "sends a guest user to the root path with an error message" do
+      #TODO
+    end
+
+    it "works for a logged in user" do
     end
   end
 
@@ -109,6 +125,13 @@ describe WorksController do #
       get work_path(destroyed_id)
 
       must_respond_with :not_found
+    end
+
+    it "sends a guest user back to the root path with an error message" do
+      #TODO
+    end
+
+    it "works for a logged in user" do
     end
   end
 

@@ -11,6 +11,11 @@ class WorksController < ApplicationController
   end
 
   def index
+    unless session[:user_id]
+      flash[:status] = :error
+      flash[:message] = "You need to log in first."
+      redirect_to root_path
+    end
     @works_by_category = Work.to_category_hash
   end
 
