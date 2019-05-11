@@ -35,12 +35,14 @@ class UsersController < ApplicationController
         flash[:status] = :error # or failure?
         flash[:result_text] = "Could not create new user account: #{user.errors.messages}"
         flash[:messages] = @work.errors.messages
-        return redirect_to root_path
+        redirect_to root_path
+        return
       end
     end
     # If we get here, we have a valid user instance
     session[:user_id] = user.id
-    return redirect_to root_path
+    redirect_to root_path
+    return
   end
 
   def destroy
@@ -77,10 +79,10 @@ class UsersController < ApplicationController
   #   redirect_to root_path
   # end
 
-  # def logout
-  #   session[:user_id] = nil
-  #   flash[:status] = :success
-  #   flash[:result_text] = "Successfully logged out"
-  #   redirect_to root_path
-  # end
+  def logout
+    session[:user_id] = nil
+    flash[:status] = :success
+    flash[:result_text] = "Successfully logged out"
+    redirect_to root_path
+  end
 end

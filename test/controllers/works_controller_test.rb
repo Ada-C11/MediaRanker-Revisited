@@ -203,19 +203,6 @@ describe WorksController do
       expect(Vote.all.length).must_equal all_votes
     end
 
-    it "redirects to the work page after the user has logged out" do
-      start_count = User.count
-      user = users(:grace)
-
-      perform_login(user)
-
-      delete logout_path
-
-      must_redirect_to works_path
-
-      session[:user_id].must_equal nil
-    end
-
     it "succeeds for a logged-in user and a fresh user-vote pair" do
       work = works(:poodr)
       user = users(:dan)
@@ -253,6 +240,23 @@ describe WorksController do
 
       must_respond_with :redirect
       must_redirect_to work_path(work.id)
+
+      work.reload
+
+      expect(work.votes.length).must_equal work_vote_count
+    end
+
+    it "flashes error and redirects if no user is logged in" do
+      work = works(:poodr)
+
+      work_vote_count = work.votes.length
+
+      post upvote_path(work.id)
+
+      must_respond_with :redirect
+      must_redirect_to work_path(work.id)
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
 
       work.reload
 
