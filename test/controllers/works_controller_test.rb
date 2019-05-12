@@ -32,7 +32,7 @@ describe WorksController do
   INVALID_CATEGORIES = ['nope', '42', '', '  ', 'albumstrailingtext'].freeze
 
   describe 'index' do
-    describe "logged in users" do
+    describe 'logged in users' do
       it 'succeeds when there are works' do
         perform_login
         get works_path
@@ -50,14 +50,15 @@ describe WorksController do
       end
     end
 
-  describe "logged out users" do
-    it 'redirects to the root_path if the user is not logged in' do
-      get works_path
+    describe 'logged out users' do
+      it 'redirects to the root_path if the user is not logged in' do
+        get works_path
 
-      must_redirect_to root_path
+        must_redirect_to root_path
+        expect(flash[:result_text]).must_equal "You must be logged in to do this action"
+      end
     end
   end
-end
 
   describe 'new' do
     it 'succeeds' do
@@ -104,8 +105,7 @@ end
   end
 
   describe 'show' do
-
-    describe "logged in users" do
+    describe 'logged in users' do
       it 'succeeds for an extant work ID' do
         perform_login
         get work_path(existing_work.id)
@@ -124,11 +124,12 @@ end
       end
     end
 
-    describe "logged out users" do 
+    describe 'logged out users' do
       it 'redirects to the root path if a user is not logged in' do
         get work_path(existing_work.id)
 
         must_redirect_to root_path
+        expect(flash[:result_text]).must_equal "You must be logged in to do this action"
       end
     end
   end
@@ -209,33 +210,37 @@ end
   end
 
   describe 'upvote' do
-    it 'redirects to the work page if no user is logged in' do
-      post upvote_path(existing_work)
+    describe 'logged out user' do
+      it 'redirects to the work page if no user is logged in' do
+        post upvote_path(existing_work)
 
-      expect(flash[:result_text]).must_equal 'You must log in to do that'
-      must_redirect_to work_path(existing_work)
+        expect(flash[:result_text]).must_equal 'You must log in to do that'
+        must_redirect_to work_path(existing_work)
+      end
     end
 
-    it 'redirects to the root page after the user has logged out' do
-      perform_login
+    describe 'logged in user' do
+      it 'redirects to the root page after the user has logged out' do
+        perform_login
 
-      delete logout_path
+        delete logout_path
 
-      must_redirect_to root_path
-    end
+        must_redirect_to root_path
+      end
 
-    it 'succeeds for a logged-in user and a fresh user-vote pair' do
-      work = works(:poodr)
-      perform_login
-      post upvote_path(work)
-      expect(flash[:result_text]).must_equal 'Successfully upvoted!'
-    end
+      it 'succeeds for a logged-in user and a fresh user-vote pair' do
+        work = works(:poodr)
+        perform_login
+        post upvote_path(work)
+        expect(flash[:result_text]).must_equal 'Successfully upvoted!'
+      end
 
-    it 'redirects to the work page if the user has already voted for that work' do
-      perform_login
-      post upvote_path(existing_work)
-      expect(flash[:result_text]).must_equal 'Could not upvote'
-      must_redirect_to work_path(existing_work)
+      it 'redirects to the work page if the user has already voted for that work' do
+        perform_login
+        post upvote_path(existing_work)
+        expect(flash[:result_text]).must_equal 'Could not upvote'
+        must_redirect_to work_path(existing_work)
+      end
     end
   end
 end
