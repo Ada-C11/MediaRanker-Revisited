@@ -1,8 +1,6 @@
 class WorksController < ApplicationController
-  # We should always be able to tell what category
-  # of work we're dealing with
   before_action :category_from_work, except: [:root, :index, :new, :create]
-
+  before_action :find_user, except: [:index]
   def root
     @albums = Work.best_albums
     @books = Work.best_books
@@ -11,11 +9,22 @@ class WorksController < ApplicationController
   end
 
   def index
-    @works_by_category = Work.to_category_hash
+    if session[:user_id]
+      @works_by_category = Work.to_category_hash
+    else
+      redirect_to root_path
+      flash[:result_text] = "You must be logged in to see this page"
+    end
   end
 
   def new
-    @work = Work.new
+    flash[:status] = :failure
+    if session[:user_id]
+      @work = Work.new
+    else
+      flash[:result_text] = "You must be logged in to see this page"
+      redirect_to root_path
+    end
   end
 
   def create
