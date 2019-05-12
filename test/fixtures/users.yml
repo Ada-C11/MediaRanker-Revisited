@@ -2,6 +2,13 @@
 
 dan:
   username: dan
+  uid: 12345
+  email: dan@dan.com
+  provider: github
 
-kari:
-  username: kari
+
+chris:
+  username: chris
+  uid: 12345
+  email: chris@chris.com
+  provider: github

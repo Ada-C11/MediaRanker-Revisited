@@ -23,4 +23,29 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
   # Add more helper methods to be used by all tests here...
+  def setup
+    OmniAuth.config.test_mode = true
+  end
+
+  # Mock Auth Hash
+  def mock_auth_hash(user)
+    {
+      provider: user.provider,
+      uid: user.uid,
+      info: {
+        email: user.email,
+        username: user.username
+      }
+    }
+  end
+
+  # Perform Login
+  def perform_login(user = nil)
+    user ||= User.first
+
+    OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
+    get auth_callback_path(:github)
+
+    return user
+  end
 end

@@ -5,7 +5,7 @@
 # below each fixture, per the syntax in the comments below
 #
 one:
-  user: kari
+  user: chris
   work: album
 
 two:
