@@ -34,25 +34,58 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
-      get works_path
-
-      must_respond_with :success
+    before do
+      @user = users(:grace)
     end
+    describe "logged in users" do
+      it "succeeds when there are works" do
+        perform_login(@user)
+        get works_path
 
-    it "succeeds when there are no works" do
-      Work.all do |work|
-        work.destroy
+        must_respond_with :success
       end
 
-      get works_path
+      it "succeeds when there are no works" do
+        perform_login(@user)
+        Work.all do |work|
+          work.destroy
+        end
 
-      must_respond_with :success
+        get works_path
+
+        must_respond_with :success
+      end
+    end
+    describe "logged out users" do
+      before do
+        perform_login(@user)
+        post logout_path
+      end
+      it "redirects when there are works" do
+        get works_path
+
+        expect(flash[:error]).must_equal "You must be logged in to do this action"
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
+
+      it "redirects when there are no works" do
+        Work.all do |work|
+          work.destroy
+        end
+
+        get works_path
+
+        expect(flash[:error]).must_equal "You must be logged in to do this action"
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
     end
   end
 
   describe "new" do
-    it "succeeds" do
+    it "succeeds when user is logged in" do
+      perform_login(users(:grace))
       get new_work_path
 
       must_respond_with :success
@@ -61,7 +94,7 @@ describe WorksController do
 
   describe "create" do
     it "creates a work with valid data for a real category" do
-      new_work = { work: { title: "Dirty Computer", category: "album" } }
+      new_work = {work: {title: "Dirty Computer", category: "album"}}
 
       expect {
         post works_path, params: new_work
@@ -74,7 +107,7 @@ describe WorksController do
     end
 
     it "renders bad_request and does not update the DB for bogus data" do
-      bad_work = { work: { title: nil, category: "book" } }
+      bad_work = {work: {title: nil, category: "book"}}
 
       expect {
         post works_path, params: bad_work
@@ -85,7 +118,7 @@ describe WorksController do
 
     it "renders 400 bad_request for bogus categories" do
       INVALID_CATEGORIES.each do |category|
-        invalid_work = { work: { title: "Invalid Work", category: category } }
+        invalid_work = {work: {title: "Invalid Work", category: category}}
 
         proc { post works_path, params: invalid_work }.wont_change "Work.count"
 
@@ -96,19 +129,38 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
-      get work_path(existing_work.id)
+    describe "logged in users" do
+      before do
+        perform_login(users(:grace))
+      end
+      it "succeeds for an extant work ID" do
+        get work_path(existing_work.id)
 
-      must_respond_with :success
+        must_respond_with :success
+      end
+
+      it "renders 404 not_found for a bogus work ID" do
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      destroyed_id = existing_work.id
-      existing_work.destroy
+    describe "guest user" do
+      before do
+        perform_login(users(:grace))
+        post logout_path
+      end
+      it "redirects for an extant work ID" do
+        get work_path(existing_work.id)
 
-      get work_path(destroyed_id)
-
-      must_respond_with :not_found
+        expect(flash[:error]).must_equal "You must be logged in to do this action"
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
     end
   end
 
@@ -131,7 +183,7 @@ describe WorksController do
 
   describe "update" do
     it "succeeds for valid data and an extant work ID" do
-      updates = { work: { title: "Dirty Computer" } }
+      updates = {work: {title: "Dirty Computer"}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -144,7 +196,7 @@ describe WorksController do
     end
 
     it "renders bad_request for bogus data" do
-      updates = { work: { title: nil } }
+      updates = {work: {title: nil}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -159,7 +211,7 @@ describe WorksController do
       bogus_id = existing_work.id
       existing_work.destroy
 
-      put work_path(bogus_id), params: { work: { title: "Test Title" } }
+      put work_path(bogus_id), params: {work: {title: "Test Title"}}
 
       must_respond_with :not_found
     end
@@ -188,20 +240,42 @@ describe WorksController do
   end
 
   describe "upvote" do
-    it "redirects to the work page if no user is logged in" do
-      skip
-    end
-
-    it "redirects to the work page after the user has logged out" do
-      skip
+    before do
+      @user = users(:grace)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      Vote.delete_all
+      perform_login(@user)
+      expect {
+        post upvote_path(existing_work.id)
+      }.must_change "Vote.count", 1
+      expect(flash[:result_text]).must_equal "Successfully upvoted!"
+      expect(existing_work.vote_ids.first).must_equal Vote.first.id
+      expect(@user.vote_ids.first).must_equal Vote.first.id
+      must_respond_with :redirect
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      perform_login(@user)
+      vote = Vote.new(user: @user, work: existing_work)
+      vote.save
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count"
+      expect(flash[:result_text]).must_equal "Could not upvote"
+      expect(flash[:messages][:user]).must_equal ["has already voted for this work"]
+      must_redirect_to work_path(existing_work.id)
+    end
+
+    it "redirects to the main page if no user is logged in" do
+      perform_login(@user)
+      post logout_path
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count"
+      expect(flash[:error]).must_equal "You must be logged in to do this action"
+      must_redirect_to root_path
     end
   end
 end
