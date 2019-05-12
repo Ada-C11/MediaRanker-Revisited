@@ -28,19 +28,33 @@ describe WorksController do
 
       must_respond_with :success
     end
+
+    it "renders even if a user isn't logged in" do
+      delete logout_path
+      expect(session[:user_id]).must_equal nil
+
+      get root_path
+
+      must_respond_with :success
+    end
   end
 
   CATEGORIES = %w(albums books movies)
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
+    before do
+      @user = users(:dan)
+    end
+    it "succeeds for a logged in user when there are works" do
+      perform_login(@user)
       get works_path
 
       must_respond_with :success
     end
 
-    it "succeeds when there are no works" do
+    it "succeeds for a logged in user when there are no works" do
+      perform_login(@user)
       Work.all do |work|
         work.destroy
       end
@@ -48,6 +62,15 @@ describe WorksController do
       get works_path
 
       must_respond_with :success
+    end
+
+    it "sends a guest user to the root path with an error message" do
+      get works_path
+
+      expect(flash[:status]).must_equal :error
+      expect(flash[:message]).wont_be_nil
+
+      must_redirect_to root_path
     end
   end
 
@@ -96,7 +119,11 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
+    before do
+      @user = users(:dan)
+    end
+    it "succeeds for a logged in user with an extant work ID" do
+      perform_login(@user)
       get work_path(existing_work.id)
 
       must_respond_with :success
@@ -109,6 +136,15 @@ describe WorksController do
       get work_path(destroyed_id)
 
       must_respond_with :not_found
+    end
+
+    it "sends a guest user back to the root path with an error message" do
+      get work_path(existing_work.id)
+
+      expect(flash[:status]).must_equal :error
+      expect(flash[:message]).wont_be_nil
+
+      must_redirect_to root_path
     end
   end
 
@@ -188,20 +224,54 @@ describe WorksController do
   end
 
   describe "upvote" do
+    before do
+      @user = users(:dan)
+      @work = Work.first
+      @start_count = Vote.count
+    end
     it "redirects to the work page if no user is logged in" do
-      skip
+      post upvote_path(@work)
+      expect(flash[:result_text]).wont_be_nil
+      expect(@start_count).must_equal Vote.count
+
+      must_redirect_to work_path(@work)
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login(@user)
+      expect(session[:user_id]).must_equal @user.id
+      delete logout_path
+      expect(session[:user_id]).must_equal nil
+
+      post upvote_path(@work)
+      expect(flash[:result_text]).wont_be_nil
+      expect(@start_count).must_equal Vote.count
+
+      must_redirect_to work_path(@work)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      before_vote = @work.votes.count
+      perform_login(@user)
+      expect(session[:user_id]).must_equal @user.id
+
+      post upvote_path(@work)
+      expect(Vote.count).must_equal @start_count + 1
+      expect(@work.votes.count).must_equal before_vote + 1
+
+      must_redirect_to work_path(@work)
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      perform_login(@user)
+      expect(session[:user_id]).must_equal @user.id
+
+      post upvote_path(@work)
+      expect(Vote.count).must_equal @start_count + 1
+      post upvote_path(@work)
+      expect(Vote.count).must_equal @start_count + 1
+
+      must_redirect_to work_path(@work)
     end
   end
 end
