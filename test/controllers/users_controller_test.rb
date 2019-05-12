@@ -36,15 +36,15 @@ describe UsersController do
   end
 
   describe "login" do
-    #it "can log in an existing user" do
-      # binding.pry
-      #expect {
-        #user = perform_login(user)
-      #}.wont_change "User.count"
+    it "can log in an existing user" do
+      user_count = User.count
+      user = users(:one)
 
-      #expect(session[:user_id]).must_equal user.id
-      #expect(flash[:success]).must_equal "Logged in as returning user #{user.username}"
-    #end
+      perform_login(user)
+
+      expect(session[:user_id]).must_equal user.id
+      expect(flash[:success]).must_equal "Logged in as returning user #{user.username}"
+    end
 
     it "can log in a new user" do
       # Arrange
