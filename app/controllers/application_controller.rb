@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   def require_login
     current_user = find_user
     if !current_user
-      flash[:error] = "You must be logged in to view this page."
+      flash[:result_text] = "You must be logged in to view this page."
       # raise
       redirect_to root_path
     end
