@@ -2,6 +2,7 @@ require "test_helper"
 
 describe WorksController do
   let(:existing_work) { works(:album) }
+  let(:user) { users(:dan) }
 
   describe "root" do
     it "succeeds with all media types" do
@@ -61,7 +62,7 @@ describe WorksController do
 
   describe "create" do
     it "creates a work with valid data for a real category" do
-      new_work = { work: { title: "Dirty Computer", category: "album" } }
+      new_work = {work: {title: "Dirty Computer", category: "album"}}
 
       expect {
         post works_path, params: new_work
@@ -74,7 +75,7 @@ describe WorksController do
     end
 
     it "renders bad_request and does not update the DB for bogus data" do
-      bad_work = { work: { title: nil, category: "book" } }
+      bad_work = {work: {title: nil, category: "book"}}
 
       expect {
         post works_path, params: bad_work
@@ -85,7 +86,7 @@ describe WorksController do
 
     it "renders 400 bad_request for bogus categories" do
       INVALID_CATEGORIES.each do |category|
-        invalid_work = { work: { title: "Invalid Work", category: category } }
+        invalid_work = {work: {title: "Invalid Work", category: category}}
 
         proc { post works_path, params: invalid_work }.wont_change "Work.count"
 
@@ -131,7 +132,7 @@ describe WorksController do
 
   describe "update" do
     it "succeeds for valid data and an extant work ID" do
-      updates = { work: { title: "Dirty Computer" } }
+      updates = {work: {title: "Dirty Computer"}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -144,7 +145,7 @@ describe WorksController do
     end
 
     it "renders bad_request for bogus data" do
-      updates = { work: { title: nil } }
+      updates = {work: {title: nil}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -159,7 +160,7 @@ describe WorksController do
       bogus_id = existing_work.id
       existing_work.destroy
 
-      put work_path(bogus_id), params: { work: { title: "Test Title" } }
+      put work_path(bogus_id), params: {work: {title: "Test Title"}}
 
       must_respond_with :not_found
     end
@@ -189,19 +190,48 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      skip
+      start_count = Vote.count
+      post upvote_path(existing_work)
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
+      Vote.count.must_equal start_count
+      must_respond_with :redirect
+      must_redirect_to work_path(existing_work)
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      start_count = Vote.count
+      perform_login(user)
+      delete logout_path
+      post upvote_path(existing_work)
+
+      Vote.count.must_equal start_count
+      must_respond_with :redirect
+      must_redirect_to work_path(existing_work)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      start_count = Vote.count
+      perform_login(user)
+      post upvote_path(works(:poodr))
+
+      expect(flash[:status]).must_equal :success
+      expect(flash[:result_text]).must_equal "Successfully upvoted!"
+      Vote.count.must_equal start_count + 1
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      start_count = Vote.count
+      perform_login(user)
+      post upvote_path(existing_work)
+      post upvote_path(existing_work)
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "Could not upvote"
+      must_respond_with :redirect
+      must_redirect_to work_path(existing_work)
+      Vote.count.must_equal start_count
     end
   end
 end
