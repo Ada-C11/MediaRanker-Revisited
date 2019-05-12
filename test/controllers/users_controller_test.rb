@@ -2,7 +2,7 @@ require "test_helper"
 
 describe UsersController do
 
-  describe "auth callback" do
+  describe "create" do
     it "logs in an existing user" do
       # Arrange
       start_count = User.count
@@ -36,7 +36,7 @@ describe UsersController do
 
     it "redirects to the login route with invalid data" do
       start_count = User.count
-      user = User.new(provider: 'github', uid: -100, username: 'test', email: 'test@user.com')
+      user = User.new(provider: 'github', uid: 1, username: '', email: 'test@user.com')
   
       OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
       get auth_callback_path(:github)
@@ -46,7 +46,10 @@ describe UsersController do
       User.count.must_equal start_count
 
     end
+  end
 
+
+  describe "destroy" do
     it "responds with redirect and deletes user session on logout" do
       # Arrange
       user = users(:dan)
@@ -61,5 +64,4 @@ describe UsersController do
       session[:user_id].must_equal nil
     end
   end
-
 end
