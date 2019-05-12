@@ -15,3 +15,7 @@ two:
 three:
   user: dan
   work: album
+
+duplicate_vote:
+  user: user1
+  work: poodr

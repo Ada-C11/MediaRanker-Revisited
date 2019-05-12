@@ -3,13 +3,13 @@
 user1:
   username: user1
   uid: 123
-  provider: GitHub
+  provider: github
   name: First1 Last1
   email: user1@gmail.com
 
 user2:
   username: user2
   uid: 456
-  provider: GitHub
+  provider: github
   name: First2 Last2
   email: user2@gmail.com

@@ -8,23 +8,24 @@ class UsersController < ApplicationController
     render_404 unless @user
   end
 
-  def login_form
-  end
+  # def login_form
+  # end
 
-  def logout
-    session[:user_id] = nil
-    flash[:status] = :success
-    flash[:result_text] = "Successfully logged out #{user.email}"
-    redirect_to root_path
-  end
+  # def logout
+  #   session[:user_id] = nil
+  #   flash[:status] = :success
+  #   flash[:result_text] = "Successfully logged out #{user.email}"
+  #   redirect_to root_path
+  # end
 
   def create
     auth_hash = request.env["omniauth.auth"]
 
     user = User.find_by(uid: auth_hash[:uid], provider: "github")
+
     if user
       flash[:status] = :success
-      flash[:result_text] = "Successfully logged in as existing user #{user.username}"
+      flash[:result_text] = "Successfully logged in as existing user #{user.email}"
     else
       user = User.build_from_github(auth_hash)
 
@@ -37,6 +38,7 @@ class UsersController < ApplicationController
     end
 
     session[:user_id] = user.id
+
     return redirect_to root_path
   end
 
