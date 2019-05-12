@@ -8,7 +8,7 @@ class UsersController < ApplicationController
     render_404 unless @user
   end
 
-  def create
+  def login
     auth_hash = request.env["omniauth.auth"]
 
     user = User.find_by(uid: auth_hash[:uid], provider: "github")

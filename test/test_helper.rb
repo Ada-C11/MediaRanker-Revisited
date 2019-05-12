@@ -41,7 +41,7 @@ def mock_auth_hash(user)
 end
 
 def perform_login(user = nil)
-  user || User.first
+  user ||= User.first
 
   OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
 
@@ -49,4 +49,6 @@ def perform_login(user = nil)
 
   must_respond_with :redirect
   must_redirect_to root_path
+
+  return user
 end
