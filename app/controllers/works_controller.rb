@@ -9,18 +9,17 @@ class WorksController < ApplicationController
   end
 
   def index
-    flash[:status] = :failure
-    if @login_user
+    if session[:user_id]
       @works_by_category = Work.to_category_hash
     else
-      flash[:result_text] = "You must be logged in to see this page"
       redirect_to root_path
+      flash[:result_text] = "You must be logged in to see this page"
     end
   end
 
   def new
     flash[:status] = :failure
-    if @login_user
+    if session[:user_id]
       @work = Work.new
     else
       flash[:result_text] = "You must be logged in to see this page"

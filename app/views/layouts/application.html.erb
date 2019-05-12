@@ -33,7 +33,7 @@
         </li>
       </ul>
       <ul class="nav app-header__user-nav-container">
-        <% if @login_user%>
+        <% if session[:user_id]%>
 
         <li class="nav-item app-header__nav_item">
           <%= link_to "Log Out", logout_path, method: :delete, class: "btn btn-primary" %>
