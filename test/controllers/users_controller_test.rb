@@ -6,7 +6,7 @@ describe UsersController do
     it "logs in an existing user" do
       # Arrange
       start_count = User.count
-      user = users(:dan)
+      user = users(:ada)
 
       # Act
       perform_login(user)
@@ -52,7 +52,7 @@ describe UsersController do
   describe "destroy" do
     it "responds with redirect and deletes user session on logout" do
       # Arrange
-      user = users(:dan)
+      user = users(:ada)
 
       # Act
       perform_login(user)
