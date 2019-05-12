@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  before_action :require_login, only: [:index, :show]
+
   def index
     @users = User.all
   end
@@ -7,16 +9,6 @@ class UsersController < ApplicationController
     @user = User.find_by(id: params[:id])
     render_404 unless @user
   end
-
-  # def login_form
-  # end
-
-  # def logout
-  #   session[:user_id] = nil
-  #   flash[:status] = :success
-  #   flash[:result_text] = "Successfully logged out #{user.email}"
-  #   redirect_to root_path
-  # end
 
   def create
     auth_hash = request.env["omniauth.auth"]

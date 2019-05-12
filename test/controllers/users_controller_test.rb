@@ -17,7 +17,7 @@ describe UsersController do
 
     it "creates an account for a new user and redirects to the root route" do
       start_count = User.count
-      user = User.new(uid: 999, provider: "github", username: "testuser")
+      user = User.new(uid: 999888, provider: "github", username: "testuser")
       perform_login(user)
       new_user = User.find_by(id: session[:user_id])
 
@@ -29,7 +29,7 @@ describe UsersController do
 
     it "redirects to the root route for invalid user data" do
       start_count = User.count
-      user = User.new(uid: 999, provider: "github")
+      user = User.new(uid: 999888, provider: "github")
       perform_login(user)
 
       expect(User.count).must_equal start_count

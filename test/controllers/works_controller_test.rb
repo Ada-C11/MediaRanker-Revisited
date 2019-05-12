@@ -2,6 +2,7 @@ require "test_helper"
 
 describe WorksController do
   let(:existing_work) { works(:album) }
+  let(:user) { users(:user1) }
 
   describe "root" do
     it "succeeds with all media types" do
@@ -35,12 +36,14 @@ describe WorksController do
 
   describe "index" do
     it "succeeds when there are works" do
+      perform_login(user)
       get works_path
 
       must_respond_with :success
     end
 
     it "succeeds when there are no works" do
+      perform_login(user)
       Work.all do |work|
         work.destroy
       end
@@ -96,7 +99,9 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an existing work ID" do
+    it "succeeds for an extant work ID" do
+      perform_login(user)
+
       my_work = works(:poodr)
 
       get work_path (my_work.id)
@@ -105,6 +110,8 @@ describe WorksController do
     end
 
     it "renders 404 not_found for a bogus work ID" do
+      perform_login(user)
+
       destroyed_id = existing_work.id
       existing_work.destroy
 
