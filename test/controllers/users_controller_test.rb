@@ -19,14 +19,22 @@ describe UsersController do
       must_respond_with :success
     end
   end
-  # describe "create" do
-  #   it "can log in an existing user" do
 
-  #     expect {
-  #       user = perform_login(user)
-  #     }.wont_change "User.count"
+  describe "login" do
+    it "can log in an existing user" do
+      user = perform_login
 
-  #     expect(session[:user_id]).must_equal user.id
-  #   end
-  # end
+      expect {
+        user = perform_login(user)
+      }.wont_change "User.count"
+
+      expect(session[:user_id]).must_equal user.id
+
+      expect(flash[:status]).must_equal :success
+      expect(flash[:result_text]).must_equal "Logged in as returning user #{user.name}"
+      
+      # must_redirect_to root_path
+    end
+
+  end
 end
