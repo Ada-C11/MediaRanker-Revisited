@@ -56,7 +56,11 @@
 
   <% if flash[:result_text] or flash[:messages] %>
     <section class="alert__container">
-      <div class="alert alert-<%= flash[:status].to_s == 'failure' ? 'warning' : flash[:status] %>">
+      <% if flash[:result_text] == "You must be logged in to view this page." %>
+      <div class="alert alert-secondary">
+      <% else %>
+       <div class="alert alert-<%= flash[:status].to_s == 'failure' ? 'warning' : flash[:status] %>">
+       <%end%>
         <span><%= flash[:status].to_s == "failure" ? "A problem occurred: " : "" %><%= flash[:result_text] %></span>
         <% if flash[:messages] %>
           <ul>
@@ -69,6 +73,13 @@
         <% end %>
       </div>
     </section>
+  <% end %>
+
+  <% if flash[:result_text]%>
+    <section class="alert__container">
+      <div class="">
+    </section>
+
   <% end %>
 
   <main>
