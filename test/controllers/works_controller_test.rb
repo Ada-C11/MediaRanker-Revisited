@@ -61,7 +61,7 @@ describe WorksController do
 
   describe "create" do
     it "creates a work with valid data for a real category" do
-      new_work = { work: { title: "Dirty Computer", category: "album" } }
+      new_work = {work: {title: "Dirty Computer", category: "album"}}
 
       expect {
         post works_path, params: new_work
@@ -74,7 +74,7 @@ describe WorksController do
     end
 
     it "renders bad_request and does not update the DB for bogus data" do
-      bad_work = { work: { title: nil, category: "book" } }
+      bad_work = {work: {title: nil, category: "book"}}
 
       expect {
         post works_path, params: bad_work
@@ -85,7 +85,7 @@ describe WorksController do
 
     it "renders 400 bad_request for bogus categories" do
       INVALID_CATEGORIES.each do |category|
-        invalid_work = { work: { title: "Invalid Work", category: category } }
+        invalid_work = {work: {title: "Invalid Work", category: category}}
 
         proc { post works_path, params: invalid_work }.wont_change "Work.count"
 
@@ -131,7 +131,7 @@ describe WorksController do
 
   describe "update" do
     it "succeeds for valid data and an extant work ID" do
-      updates = { work: { title: "Dirty Computer" } }
+      updates = {work: {title: "Dirty Computer"}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -144,7 +144,7 @@ describe WorksController do
     end
 
     it "renders bad_request for bogus data" do
-      updates = { work: { title: nil } }
+      updates = {work: {title: nil}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -159,7 +159,7 @@ describe WorksController do
       bogus_id = existing_work.id
       existing_work.destroy
 
-      put work_path(bogus_id), params: { work: { title: "Test Title" } }
+      put work_path(bogus_id), params: {work: {title: "Test Title"}}
 
       must_respond_with :not_found
     end
@@ -186,6 +186,21 @@ describe WorksController do
       must_respond_with :not_found
     end
   end
+
+  #add controller filter to workscontroller
+  #the test below are defitely less than we need, write the tests below
+  #   As a guest user, I want to be able to...
+
+  # access the main page without an error message
+  # access the index page should be redirected to the main page with an error message
+  # access the show page for any work should be redirected to the main page with an error message
+  # ... so that I can see parts of the website, but know that I must log-in for full functionality
+
+  # As a logged-in user, I want to be able to...
+
+  # access the show page for any work of any category
+  # access the show page for any index page
+  # ... so that I can use full site functionality as a site member
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
