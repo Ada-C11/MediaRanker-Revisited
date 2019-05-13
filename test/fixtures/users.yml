@@ -5,3 +5,7 @@ dan:
 
 kari:
   username: kari
+  uid: 321
+  provider: github
+  name: karicares
+  email: k@kares.kom
