@@ -35,27 +35,33 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "guest users" do
-    it "allows access to the main page without an error message" do
-      get root_path
-      must_respond_with :success
+    describe "root" do
+      it "allows access to the main page without an error message" do
+        get root_path
+        must_respond_with :success
+      end
     end
 
-    it "redirects to the main page with an error message if attempting to access index" do
-      get works_path
+    describe "index" do
+      it "redirects to the main page with an error message if attempting to access index" do
+        get works_path
 
-      expect(flash[:status]).must_equal :failure
-      expect(flash[:result_text]).must_equal "You must be logged in to view this section"
-      must_respond_with :redirect
-      must_redirect_to root_path
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to view this section"
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
     end
 
-    it "redirects to the main page with an error message if attempting to access show" do
-      get work_path(existing_work)
+    describe "show" do
+      it "redirects to the main page with an error message if attempting to access show" do
+        get work_path(existing_work)
 
-      expect(flash[:status]).must_equal :failure
-      expect(flash[:result_text]).must_equal "You must be logged in to view this section"
-      must_respond_with :redirect
-      must_redirect_to root_path
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to view this section"
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
     end
 
     describe "upvote" do
@@ -73,6 +79,13 @@ describe WorksController do
   describe "logged-in users" do
     before do
       perform_login(user)
+    end
+
+    describe "root" do
+      it "allows access to the main page without an error message" do
+        get root_path
+        must_respond_with :success
+      end
     end
 
     describe "index" do
@@ -140,6 +153,24 @@ describe WorksController do
     describe "show" do
       it "succeeds for an extant work ID" do
         get work_path(existing_work.id)
+
+        must_respond_with :success
+      end
+
+      it "succeeds for an album" do
+        get work_path(works(:another_album))
+
+        must_respond_with :success
+      end
+
+      it "succeeds for a book" do
+        get work_path(works(:poodr))
+
+        must_respond_with :success
+      end
+
+      it "succeeds for a movie" do
+        get work_path(works(:movie))
 
         must_respond_with :success
       end
