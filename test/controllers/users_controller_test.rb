@@ -76,7 +76,7 @@ describe UsersController do
       must_respond_with :redirect
       must_redirect_to root_path
 
-      # expect(flash[:result_text]).must_equal "Could not create new user account."
+      expect(flash[:result_text]).must_equal "Could not create new user account."
     end
 
     it "responds with a redirect if no user is logged in" do
