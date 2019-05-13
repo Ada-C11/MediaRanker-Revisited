@@ -190,17 +190,11 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      vote_count = existing_work.votes.length
-      votes = Vote.all.length
-
-      post upvote_path(existing_work.id)
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "existing_work.votes.count"
 
       must_redirect_to work_path(existing_work.id)
-
-      existing_work.reload
-
-      expect(existing_work.votes.length).must_equal vote_count
-      expect(Vote.all.length).must_equal votes
 
       expect(flash[:status]).must_equal :failure
       expect(flash[:result_text]).must_equal "You must log in to do that"
@@ -215,21 +209,24 @@ describe WorksController do
       }
       delete logout_path, params: logout_data
 
-      vote_count = existing_work.votes.length
-      votes = Vote.all.length
-
-      post upvote_path(existing_work.id)
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "existing_work.votes.count"
 
       must_redirect_to work_path(existing_work.id)
-
-      existing_work.reload
-
-      expect(existing_work.votes.length).must_equal vote_count
-      expect(Vote.all.length).must_equal votes
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      work = works(:poodr)
+
+      perform_login(user)
+
+      expect {
+        post upvote_path(work.id)
+      }.must_change "work.votes.count", 1
+
+      expect(flash[:status]).must_equal :success
+      expect(flash[:result_text]).must_equal "Successfully upvoted!"
     end
 
     it "redirects to the work page if the user has already voted for that work" do
