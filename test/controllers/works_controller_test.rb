@@ -210,7 +210,7 @@ describe WorksController do
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
       another_work = works(:another_album)
-      new_user = User.new(name: "me", uid: 876, provider: "github", email: "test@test.com")
+      new_user = User.new(username: "me", uid: 876, provider: "github", email: "test@test.com")
       perform_login(new_user)
 
       expect {
