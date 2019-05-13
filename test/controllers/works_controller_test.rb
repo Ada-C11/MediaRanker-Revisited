@@ -214,6 +214,9 @@ describe WorksController do
       }.wont_change "existing_work.votes.count"
 
       must_redirect_to work_path(existing_work.id)
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
@@ -230,7 +233,15 @@ describe WorksController do
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      perform_login(user)
+
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "existing_work.votes.count"
+
+      expect(flash[:result_text]).must_equal "Could not upvote"
+
+      must_redirect_to work_path(existing_work.id)
     end
   end
 end
