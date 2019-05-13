@@ -211,58 +211,58 @@ describe WorksController do
     end
   end
 
-  # describe "update" do
-  #   describe "logged in user" do
-  #     before do
-  #       new_user = User.new(uid: 999, provider: "github", username: "angela", email: "test@test.com")
-  #       perform_login(new_user)
-  #     end
-  #     it "succeeds for valid data and an extant work ID" do
-  #       updates = { work: { title: "Dirty Computer" } }
+  describe "update" do
+    describe "logged in user" do
+      before do
+        new_user = User.new(uid: 999, provider: "github", username: "angela", email: "test@test.com")
+        perform_login(new_user)
+      end
+      it "succeeds for valid data and an extant work ID" do
+        updates = { work: { title: "Dirty Computer" } }
 
-  #       expect {
-  #         put work_path(existing_work), params: updates
-  #       }.wont_change "Work.count"
-  #       updated_work = Work.find_by(id: existing_work.id)
+        expect {
+          put work_path(existing_work), params: updates
+        }.wont_change "Work.count"
+        updated_work = Work.find_by(id: existing_work.id)
 
-  #       updated_work.title.must_equal "Dirty Computer"
-  #       must_respond_with :redirect
-  #       must_redirect_to work_path(existing_work.id)
-  #     end
+        updated_work.title.must_equal "Dirty Computer"
+        must_respond_with :redirect
+        must_redirect_to work_path(existing_work.id)
+      end
 
-  #     it "renders bad_request for bogus data" do
-  #       updates = { work: { title: nil } }
+      it "renders bad_request for bogus data" do
+        updates = { work: { title: nil } }
 
-  #       expect {
-  #         put work_path(existing_work), params: updates
-  #       }.wont_change "Work.count"
+        expect {
+          put work_path(existing_work), params: updates
+        }.wont_change "Work.count"
 
-  #       work = Work.find_by(id: existing_work.id)
+        work = Work.find_by(id: existing_work.id)
 
-  #       must_respond_with :not_found
-  #     end
+        must_respond_with :not_found
+      end
 
-  #     it "renders 404 not_found for a bogus work ID" do
-  #       bogus_id = existing_work.id
-  #       existing_work.destroy
+      it "renders 404 not_found for a bogus work ID" do
+        bogus_id = existing_work.id
+        existing_work.destroy
 
-  #       put work_path(bogus_id), params: { work: { title: "Test Title" } }
+        put work_path(bogus_id), params: { work: { title: "Test Title" } }
 
-  #       must_respond_with :not_found
-  #     end
-  #   end
+        must_respond_with :not_found
+      end
+    end
 
-  #   # describe "guest user" do
-  #   #   it "will flash error message and redirect if user is not logged in" do
-  #   #     updates = { work: { title: nil } }
-  #   #     put work_path(existing_work), params: updates
+    describe "guest user" do
+      it "will flash error message and redirect if user is not logged in" do
+        updates = { work: { title: nil } }
+        put work_path(existing_work), params: updates
 
-  #   #     expect(flash[:status]).must_equal :failure
-  #   #     expect(flash[:result_text]).must_equal "You must be logged in to see this page!"
-  #   #     must_redirect_to root_path
-  #   #   end
-  #   # end
-  # end
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to see this page!"
+        must_redirect_to root_path
+      end
+    end
+  end
 
   describe "destroy" do
     describe "logged in user" do
