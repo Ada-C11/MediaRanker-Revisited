@@ -133,6 +133,17 @@ describe WorksController do
         must_respond_with :not_found
       end
     end
+    describe "guest user" do
+      it "should redirect a not logged-in user" do
+        get work_path(existing_work.id)
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+
+        flash[:status] = :error
+        flash[:result_text] = "You must be logged in to view this page."
+      end
+    end
   end
 
   describe "edit" do
