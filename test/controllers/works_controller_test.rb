@@ -61,7 +61,7 @@ describe WorksController do
 
   describe "create" do
     it "creates a work with valid data for a real category" do
-      new_work = { work: { title: "Dirty Computer", category: "album" } }
+      new_work = {work: {title: "Dirty Computer", category: "album"}}
 
       expect {
         post works_path, params: new_work
@@ -74,7 +74,7 @@ describe WorksController do
     end
 
     it "renders bad_request and does not update the DB for bogus data" do
-      bad_work = { work: { title: nil, category: "book" } }
+      bad_work = {work: {title: nil, category: "book"}}
 
       expect {
         post works_path, params: bad_work
@@ -85,7 +85,7 @@ describe WorksController do
 
     it "renders 400 bad_request for bogus categories" do
       INVALID_CATEGORIES.each do |category|
-        invalid_work = { work: { title: "Invalid Work", category: category } }
+        invalid_work = {work: {title: "Invalid Work", category: category}}
 
         proc { post works_path, params: invalid_work }.wont_change "Work.count"
 
@@ -131,7 +131,7 @@ describe WorksController do
 
   describe "update" do
     it "succeeds for valid data and an extant work ID" do
-      updates = { work: { title: "Dirty Computer" } }
+      updates = {work: {title: "Dirty Computer"}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -144,7 +144,7 @@ describe WorksController do
     end
 
     it "renders bad_request for bogus data" do
-      updates = { work: { title: nil } }
+      updates = {work: {title: nil}}
 
       expect {
         put work_path(existing_work), params: updates
@@ -157,9 +157,10 @@ describe WorksController do
 
     it "renders 404 not_found for a bogus work ID" do
       bogus_id = existing_work.id
+
       existing_work.destroy
 
-      put work_path(bogus_id), params: { work: { title: "Test Title" } }
+      put work_path(bogus_id), params: {work: {title: "Test Title"}}
 
       must_respond_with :not_found
     end
@@ -188,20 +189,41 @@ describe WorksController do
   end
 
   describe "upvote" do
+    let(:user) { users(:dan) }
+
     it "redirects to the work page if no user is logged in" do
-      skip
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count"
+
+      must_redirect_to work_path(existing_work.id)
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      #This was tested as part of User_controller_testing. After an user is logged out, the user gets redirected to the root_path and not the work_path
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      another_work = works(:poodr)
+      perform_login(user)
+
+      expect {
+        post upvote_path(another_work.id)
+      }.must_change "Vote.count", 1
+
+      new_vote = Vote.last
+      expect (new_vote.work_id).must_equal another_work.id
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      perform_login(user)
+
+      #user dan has already voted for the existing_work: album -refer to votes.yml (vote three)
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count" 
+
+      must_redirect_to work_path(existing_work.id)
     end
   end
 end

@@ -20,23 +20,23 @@ describe User do
   end
 
   describe "validations" do
-    it "requires a username" do
+    it "requires a uid" do
       user = User.new
       user.valid?.must_equal false
-      user.errors.messages.must_include :username
+      user.errors.messages.must_include :uid
     end
 
-    it "requires a unique username" do
-      username = "test username"
-      user1 = User.new(username: username)
+    it "requires a unique uid" do
+      uid = 1
+      user1 = User.new(uid: uid)
 
       # This must go through, so we use create!
       user1.save!
 
-      user2 = User.new(username: username)
+      user2 = User.new(uid: uid)
       result = user2.save
       result.must_equal false
-      user2.errors.messages.must_include :username
+      user2.errors.messages.must_include :uid
     end
   end
 end
