@@ -12,7 +12,6 @@ describe UsersController do
   describe "show" do
     it "should display show page for user" do
       user = perform_login(users(:ada))
-      # user = users(:ada).id
       get users_path(user)
       must_respond_with :success
     end
@@ -28,7 +27,7 @@ describe UsersController do
 
   describe "Create" do
     it "logs in an existing user and redirects to the root route" do
-      perform_login
+
       # Count the users, to make sure we're not (for example) creating
       # a new user every time we get a login request
       start_count = User.count
