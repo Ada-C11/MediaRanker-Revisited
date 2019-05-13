@@ -40,6 +40,24 @@ describe WorksController do
       must_respond_with :success
     end
 
+    it "redirects to the main page with an error message if attempting to access index" do
+      get works_path
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must be logged in to view this section"
+      must_respond_with :redirect
+      must_redirect_to root_path
+    end
+
+    it "redirects to the main page with an error message if attempting to access show" do
+      get work_path(existing_work)
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must be logged in to view this section"
+      must_respond_with :redirect
+      must_redirect_to root_path
+    end
+
     describe "upvote" do
       it "redirects to the main page if no user is logged in" do
         start_count = Vote.count
