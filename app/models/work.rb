@@ -4,10 +4,10 @@ class Work < ApplicationRecord
   has_many :ranking_users, through: :votes, source: :user
 
   validates :category, presence: true,
-                       inclusion: {in: CATEGORIES}
+                       inclusion: { in: CATEGORIES }
 
   validates :title, presence: true,
-                    uniqueness: {scope: :category}
+                    uniqueness: { scope: :category }
 
   # This is called a model filter, and is very similar to a controller filter.
   # We want to fixup the category *before* we validate, because
