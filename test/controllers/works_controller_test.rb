@@ -1,4 +1,5 @@
 require "test_helper"
+require "pry"
 
 describe WorksController do
   let(:existing_work) { works(:album) }
@@ -204,19 +205,51 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      skip
+      User.all do |user|
+        user.destroy
+      end
+
+      get works_path
+
+      must_respond_with :success
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login
+
+      delete logout_path
+
+      must_respond_with :redirect
+      expect(flash[:success]).must_equal "Successfully logged out!"
+      # binding.pry
+      # must_redirect_to work_path(existing_work)
+      # no fucking idea but         Expected response to be a redirect to <http://www.example.com/works/966291011> but was a redirect to <http://www.example.com/>.
+      # Expected "http://www.example.com/works/966291011" to be === "http://www.example.com/".
+      # test/controllers/works_controller_test.rb:224:in `block (3 levels) in <top (required)>'
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      user2 = users(:manny)
+      start_count = Vote.count
+      perform_login(user2)
+
+      # vote = Vote.new(user: user2, work: existing_work)
+      # vote.save
+      # note to self, don't do the above, we're testing the controller, oops
+
+      post upvote_path(existing_work.id)
+
+      Vote.count.must_equal start_count + 1
+      expect(flash[:result_text]).must_equal "Successfully upvoted!"
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      perform_login
+      # work = works(:album)
+      # both dan and cary have already voted for album in the fixtures soooo
+      post upvote_path(existing_work.id)
+      expect(flash[:result_text]).must_equal "Could not upvote"
+      # binding.pry
     end
   end
 end

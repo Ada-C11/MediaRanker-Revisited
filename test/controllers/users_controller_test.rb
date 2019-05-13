@@ -1,4 +1,5 @@
 require "test_helper"
+require "pry"
 
 # Wave 2: Controller Tests on upvote and UsersController
 
@@ -8,21 +9,46 @@ require "test_helper"
 # Be sure to test nominal and edge cases
 
 describe UsersController do
-  describe "auth_callback" do
+  describe "log in/log out" do
     it "logs in an existing user and redirects to the root route" do
       start_count = User.count
       user = users(:dan)
-      OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
 
-      get auth_callback_path(:github)
+      perform_login(user)
+
+      must_redirect_to root_path
+      session[:user_id].must_equal user.id
+      expect(flash[:success]).must_equal "Logged in as returning user #{user.username}"
+      User.count.must_equal start_count
+    end
+
+    it "creates an account for a new user and redirects to the root route" do
+      start_count = User.count
+      user = User.new(provider: "github", uid: 99999, username: "satan", email: "test@user.com")
+
+      perform_login(user)
 
       must_redirect_to root_path
 
-      # Since we can read the session, check that the user ID was set as expected
-      session[:user_id].must_equal user.id
+      User.count.must_equal start_count + 1
 
-      # Should *not* have created a new user
-      User.count.must_equal start_count
+      expect(flash[:success]).must_equal "Logged in as new user #{user.username}"
+      session[:user_id].must_equal User.last.id
+    end
+
+    it "redirects to the login route if given invalid user data" do
+    end
+  end
+
+  describe "logout" do
+    it "can logout user" do
+      perform_login
+
+      delete logout_path
+
+      expect(session[:user_id]).must_be_nil
+      expect(flash[:success]).must_equal "Successfully logged out!"
+      must_redirect_to root_path
     end
   end
 end
