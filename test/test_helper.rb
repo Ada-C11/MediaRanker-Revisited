@@ -41,9 +41,7 @@ class ActiveSupport::TestCase
     user ||= users(:kari)
 
     OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
-    # get users_path(:github)
-    # must_respond_with :redirect
-    # must_redirect_to root_path
+    get auth_callback_path(:github)
     return user
   end
 end
