@@ -34,13 +34,16 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
+    let(:user) { users(:dan) }
+    it "succeeds when there are works and user is logged in" do
+      perform_login(user)
       get works_path
 
       must_respond_with :success
     end
 
-    it "succeeds when there are no works" do
+    it "succeeds when there are no works and user is logged in" do
+      perform_login(user)
       Work.all do |work|
         work.destroy
       end
@@ -48,6 +51,13 @@ describe WorksController do
       get works_path
 
       must_respond_with :success
+    end
+
+    it "display error message when guest user attempt to access index page and redirect guest user to main page" do
+      get works_path
+
+      must_respond_with :redirect
+      expect(flash[:result_text]).must_equal "You must log in to view this page"
     end
   end
 
@@ -96,7 +106,10 @@ describe WorksController do
   end
 
   describe "show" do
+    let(:user) { users(:dan) }
+
     it "succeeds for an extant work ID" do
+      perform_login(user)
       get work_path(existing_work.id)
 
       must_respond_with :success
@@ -109,6 +122,13 @@ describe WorksController do
       get work_path(destroyed_id)
 
       must_respond_with :not_found
+    end
+
+    it "display error message when guest user attempt to access index page and redirect guest user to main page" do
+      get work_path(existing_work.id)
+
+      must_respond_with :redirect
+      expect(flash[:result_text]).must_equal "You must log in to see this media details"
     end
   end
 

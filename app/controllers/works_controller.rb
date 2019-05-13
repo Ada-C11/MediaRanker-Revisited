@@ -14,7 +14,7 @@ class WorksController < ApplicationController
     if @login_user
       @works_by_category = Work.to_category_hash
     else
-      flash[:result_text] = "You must log in to see all media"
+      flash[:result_text] = "You must log in to view this page"
       redirect_to root_path
     end
   end
