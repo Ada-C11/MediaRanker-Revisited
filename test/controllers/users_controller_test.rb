@@ -43,7 +43,7 @@ describe UsersController do
     end
 
     it "can log in a new user" do
-      new_user = User.new(uid: 999, provider: "github", email: "test@test.com", name: "angela")
+      new_user = User.new(uid: 999, provider: "github", username: "angela", email: "test@test.com")
       expect { perform_login(new_user) }.must_change "User.count", 1
       user = User.find_by(uid: new_user.uid)
 
@@ -54,7 +54,7 @@ describe UsersController do
     end
 
     it "flashes an error and redirects to root if user cannot be created" do
-      bad_user = User.new(username: "test", uid: nil, provider: "github")
+      bad_user = User.new(username: nil, uid: 999, provider: "github")
       OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(bad_user))
 
       expect { get auth_callback_path(:github) }.wont_change "User.count"
