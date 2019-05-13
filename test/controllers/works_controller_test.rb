@@ -211,7 +211,15 @@ describe WorksController do
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      perform_login
+      work_id = works(:poodr)
+
+      expect {
+        post upvote_path(work_id)
+      }.must_change "Vote.count", 1
+
+      must_respond_with :redirect
+      must_redirect_to work_path(work_id)
     end
 
     it "redirects to the work page if the user has already voted for that work" do
