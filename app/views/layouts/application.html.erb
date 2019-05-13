@@ -1,77 +1,77 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Media Ranker 2.0</title>
-  <%= csrf_meta_tags %>
+  <head>
+    <title>Media Ranker 2.0</title>
+    <%= csrf_meta_tags %>
 
-  <%= stylesheet_link_tag 'application', 'https://fonts.googleapis.com/css?family=Gudea:400,700|Hammersmith+One' %>
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
-  <%= favicon_link_tag 'favicon.ico' %>
-</head>
+    <%= stylesheet_link_tag 'application', 'https://fonts.googleapis.com/css?family=Gudea:400,700|Hammersmith+One' %>
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= favicon_link_tag 'favicon.ico' %>
+  </head>
 
-<body>
-  <header class="app-header__header">
-    <h1>
-      <%= link_to "Media Ranker", root_path %>
-      <small>Ranking the Best of Everything</small>
-    </h1>
+  <body>
+    <header class="app-header__header">
+      <h1>
+        <%= link_to "Media Ranker", root_path %>
+        <small>Ranking the Best of Everything</small>
+      </h1>
 
-    <nav class="app-header__nav">
-      <ul class="nav app-header__site-nav-container">
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "View top media", root_path, class: "nav-link" %>
-        </li>
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "View all media", works_path, class: "nav-link" %>
-        </li>
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "Add a new work", new_work_path, class: "nav-link" %>
-        </li>
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "View all users", users_path, class: "nav-link" %>
-        </li>
-      </ul>
-      <ul class="nav app-header__user-nav-container">
-        <% if @login_user %>
+      <nav class="app-header__nav">
+        <ul class="nav app-header__site-nav-container">
+          <li class="nav-item app-header__nav_item">
+            <%= link_to "View top media", root_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item app-header__nav_item">
+            <%= link_to "View all media", works_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item app-header__nav_item">
+            <%= link_to "Add a new work", new_work_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item app-header__nav_item">
+            <%= link_to "View all users", users_path, class: "nav-link" %>
+          </li>
+        </ul>
+        <ul class="nav app-header__user-nav-container">
+          <% if session[:user_id] %>
 
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "Logged in as #{@login_user.username}", user_path(@login_user), class: "btn btn-primary" %>
-        </li>
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "Log Out", logout_path, method: :post, class: "btn btn-primary" %>
-        </li>
+            <li class="nav-item app-header__nav_item">
+              <%= link_to "Logged in as #{User.find_by(id: session[:user_id]).name}", user_path(session[:user_id]), class: "btn btn-primary" %>
+            </li>
+            <li class="nav-item app-header__nav_item">
+              <%= link_to "Log Out", logout_path, method: "delete", class: "btn btn-primary" %>
+            </li>
 
-        <% else %>
+          <% else %>
 
-        <li class="nav-item app-header__nav_item">
-          <%= link_to "Log In", login_path, class: "btn btn-primary" %>
-        </li>
-        <% end %>
+            <li class="nav-item app-header__nav_item">
+              <%= link_to "Login with GitHub", github_login_path, class: "btn btn-primary" %>
+            </li>
+          <% end %>
 
-      </ul>
-    </nav>
-  </header>
+        </ul>
+      </nav>
+    </header>
 
-  <% if flash[:result_text] or flash[:messages] %>
-    <section class="alert__container">
-      <div class="alert alert-<%= flash[:status].to_s == 'failure' ? 'warning' : flash[:status] %>">
-        <span><%= flash[:status].to_s == "failure" ? "A problem occurred: " : "" %><%= flash[:result_text] %></span>
-        <% if flash[:messages] %>
-          <ul>
-            <% flash[:messages].each do |name, problems| %>
-              <% problems.each do |problem| %>
-                <li><%= name %>: <%= problem %></li>
+    <% if flash[:result_text] or flash[:messages] %>
+      <section class="alert__container">
+        <div class="alert alert-<%= flash[:status].to_s == 'failure' ? 'warning' : flash[:status] %>">
+          <span><%= flash[:status].to_s == "failure" ? "A problem occurred: " : "" %><%= flash[:result_text] %></span>
+          <% if flash[:messages] %>
+            <ul>
+              <% flash[:messages].each do |name, problems| %>
+                <% problems.each do |problem| %>
+                  <li><%= name %>: <%= problem %></li>
+                <% end %>
               <% end %>
-            <% end %>
-          </ul>
-        <% end %>
-      </div>
-    </section>
-  <% end %>
+            </ul>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
 
-  <main>
-    <%= yield %>
-  </main>
-</body>
+    <main>
+      <%= yield %>
+    </main>
+  </body>
 </html>
