@@ -51,4 +51,25 @@ describe UsersController do
       must_redirect_to root_path
     end
   end
+
+  describe "index on log in " do
+    it "should get index when user is logged it" do
+      perform_login
+
+      get users_path
+
+      must_respond_with :success
+    end
+
+    it "should not get index when logged out" do
+      #   delete logout_path
+      get users_path
+
+      must_respond_with :redirect
+      must_redirect_to root_path
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "you have to be logged in to see this!"
+    end
+  end
 end

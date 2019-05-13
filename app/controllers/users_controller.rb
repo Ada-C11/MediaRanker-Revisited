@@ -1,6 +1,13 @@
 class UsersController < ApplicationController
   def index
-    @users = User.all
+    if session[:user_id]
+      @users = User.all
+    else
+      redirect_to root_path
+      flash[:status] = :failure
+      flash[:result_text] = "you have to be logged in to see this!"
+    end
+    # I feel like there should be a way to do this without repeating it all the time, like, yup, applications controller?
   end
 
   def show
