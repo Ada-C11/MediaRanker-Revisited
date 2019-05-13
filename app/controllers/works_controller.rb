@@ -62,6 +62,11 @@ class WorksController < ApplicationController
   end
 
   def edit
+    if @login_user.nil?
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to see this page!"
+      return redirect_to root_path
+    end
   end
 
   def update
