@@ -53,11 +53,24 @@ describe UsersController do
       must_redirect_to root_path
     end
 
-    it "flashes an error and redirects to root if user cannot be created" do
+    it "flashes an error and redirects to root if user info is invalid" do
       bad_user = User.new(username: nil, uid: 999, provider: "github")
       OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(bad_user))
 
       expect { get auth_callback_path(:github) }.wont_change "User.count"
+      must_redirect_to root_path
+
+      expect(flash[:result_text]).must_equal "Could not create new user account: "
+    end
+
+    it "flashes an error and redirects to root if provider does not grant permission" do
+      OmniAuth.config.mock_auth[:github] = nil
+
+      get auth_callback_path(:github)
+      expect {
+        get auth_callback_path(:github)
+      }.wont_change "User.count"
+      must_respond_with :redirect
       must_redirect_to root_path
 
       expect(flash[:result_text]).must_equal "Could not create new user account: "
