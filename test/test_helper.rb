@@ -36,7 +36,7 @@ class ActiveSupport::TestCase
              uid: user.uid,
              info: {
                email: user.email,
-               nickname: user.username,
+               name: user.name,
              },
            }
   end
@@ -48,5 +48,10 @@ class ActiveSupport::TestCase
     get auth_callback_path(:github)
 
     return user
+  end
+
+  def check_flash(expected_status = :success)
+    expect(flash[:status]).must_equal(expected_status)
+    expect(flash[:message]).wont_be_nil
   end
 end

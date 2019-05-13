@@ -12,7 +12,7 @@ class UsersController < ApplicationController
     auth_hash = request.env["omniauth.auth"]
 
     user = User.get_authorized_user(auth_hash)
-    user.save
+
     if user.save
       flash[:status] = :success
       flash[:result_text] = "Successfully logged in as #{user.name}"
