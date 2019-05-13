@@ -24,22 +24,39 @@ describe UsersController do
     end
 
     describe "guest user" do
+      it "will flash error message and redirect if user is not logged in" do
+        get users_path
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to see this page!"
+        must_redirect_to root_path
+      end
     end
   end
 
   describe "show" do
-    it "responds with success if user exists" do
-      perform_login(user_one)
+    describe "logged in user" do
+      it "responds with success if user exists" do
+        perform_login(user_one)
 
-      get user_path(user_one.id)
-      must_respond_with :success
+        get user_path(user_one.id)
+        must_respond_with :success
+      end
+
+      it "responds with a 404 if user does not exist" do
+        perform_login(user_one)
+
+        get user_path(-1)
+        must_respond_with :not_found
+      end
     end
 
-    it "responds with a 404 if user does not exist" do
-      perform_login(user_one)
-
-      get user_path(-1)
-      must_respond_with :not_found
+    describe "guest user" do
+      it "will flash error message and redirect if user is not logged in" do
+        get user_path(user_one.id)
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to see this page!"
+        must_redirect_to root_path
+      end
     end
   end
 
