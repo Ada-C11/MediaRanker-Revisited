@@ -4,18 +4,26 @@ describe UsersController do
   let (:user_one) { users(:dan) }
   let (:user_two) { users(:kari) }
   describe "index" do
-    it "should get index when users exist" do
-      get users_path
-      must_respond_with :success
-    end
+    describe "logged in user " do
+      it "should get index when users exist" do
+        perform_login(user_one)
+        get users_path
 
-    it "should get index when no users exist" do
-      User.all do |user|
-        user.destroy
+        must_respond_with :success
       end
 
-      get users_path
-      must_respond_with :success
+      it "should get index when no users exist" do
+        perform_login(user_one)
+        User.all do |user|
+          user.destroy
+        end
+
+        get users_path
+        must_respond_with :success
+      end
+    end
+
+    describe "guest user" do
     end
   end
 
