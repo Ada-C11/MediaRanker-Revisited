@@ -1,5 +1,5 @@
 require "test_helper"
-require "pry"
+
 describe UsersController do
   describe "login" do
     it "can log in an existing user" do
@@ -36,6 +36,21 @@ describe UsersController do
 
       expect(flash.now[:uid]).must_equal ["can't be blank"]
 
+      must_respond_with :redirect
+      must_redirect_to root_path
+    end
+  end
+
+  describe "logout" do
+    it "should log an existing user out" do
+      perform_login
+
+      expect {
+        delete logout_path
+      }.wont_change "User.count"
+
+      expect(flash[:result_text]).must_equal "Successfully logged out!"
+      expect(session[:user_id]).must_be_nil
       must_respond_with :redirect
       must_redirect_to root_path
     end

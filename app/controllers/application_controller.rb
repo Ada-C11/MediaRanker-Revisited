@@ -15,4 +15,13 @@ class ApplicationController < ActionController::Base
       @login_user = User.find_by(id: session[:user_id])
     end
   end
+
+  def require_login
+    current_user = find_user
+    if current_user.nil?
+      flash[:status] = :warning
+      flash[:result_text] = "You must be logged in to do this action"
+      redirect_to root_path
+    end
+  end
 end
