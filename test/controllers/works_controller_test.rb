@@ -2,6 +2,7 @@ require "test_helper"
 
 describe WorksController do
   let(:existing_work) { works(:album) }
+  let(:user_one) { users(:dan) }
 
   describe "root" do
     it "succeeds with all media types" do
@@ -189,19 +190,47 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      skip
+      post upvote_path(existing_work.id)
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
+      must_respond_with :redirect
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login(user_one)
+      expect(flash[:result_text]).must_equal "Logged in as returning user #{user_one.name}"
+      expect(session[:user_id]).wont_be_nil
+
+      delete logout_path
+      expect(session[:user_id]).must_be_nil
+      expect(flash[:result_text]).must_equal "Successfully logged out!"
+      must_redirect_to root_path
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      another_work = works(:another_album)
+      new_user = User.new(name: "me", uid: 876, provider: "github", email: "test@test.com")
+      perform_login(new_user)
+
+      expect {
+        post upvote_path(another_work.id)
+      }.must_change "Vote.count", 1
+
+      expect(flash[:status]).must_equal :success
+      expect(flash[:result_text]).must_equal "Successfully upvoted!"
+      must_respond_with :redirect
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      perform_login(user_one)
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count"
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "Could not upvote"
+      must_respond_with :redirect
     end
   end
 end
