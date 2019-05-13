@@ -221,7 +221,7 @@ describe WorksController do
       #user dan has already voted for the existing_work: album -refer to votes.yml (vote three)
       expect {
         post upvote_path(existing_work.id)
-      }.wont_change "Vote.count" 
+      }.wont_change "Vote.count"
 
       must_redirect_to work_path(existing_work.id)
     end
