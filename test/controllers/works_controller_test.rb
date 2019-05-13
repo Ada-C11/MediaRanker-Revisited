@@ -222,8 +222,23 @@ describe WorksController do
       must_redirect_to work_path(work_id)
     end
 
-    it "redirects to the work page if the user has already voted for that work" do
-      skip
+    it "redirects to the individual work page if the user has already voted for that work" do
+      perform_login
+      work_id = works(:poodr)
+
+      expect {
+        post upvote_path(work_id)
+      }.must_change "Vote.count", 1
+
+      expect {
+        post upvote_path(work_id)
+      }.wont_change "Vote.count"
+
+      must_respond_with :redirect
+      must_redirect_to work_path(work_id)
+    end
+
+    it "redirects to the work page if a logged in user tries to upvote a work that does not exist" do
     end
   end
 end
