@@ -41,7 +41,7 @@ class ActiveSupport::TestCase
 
   # Perform Login
   def perform_login(user = nil)
-    user ||= users(:dan)
+    user ||= users(:ada)
 
     OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
     get auth_callback_path(:github)

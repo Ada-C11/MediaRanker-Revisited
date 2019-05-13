@@ -34,20 +34,36 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
-      get works_path
+    describe "logged in user" do
+      it "succeeds when there are works" do
+        perform_login
+        get works_path
 
-      must_respond_with :success
-    end
-
-    it "succeeds when there are no works" do
-      Work.all do |work|
-        work.destroy
+        must_respond_with :success
       end
 
-      get works_path
+      it "succeeds when there are no works" do
+        perform_login
+        Work.all do |work|
+          work.destroy
+        end
 
-      must_respond_with :success
+        get works_path
+
+        must_respond_with :success
+      end
+    end
+
+    describe "logged out user" do
+      it "redirects to home page and shows flash msg" do
+        get works_path
+        must_respond_with :redirect
+        must_redirect_to root_path
+
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to do that."
+      end
+
     end
   end
 
@@ -96,19 +112,33 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
-      get work_path(existing_work.id)
+    describe "logged in user" do
+      it "succeeds for an extant work ID" do
+        perform_login
+        get work_path(existing_work.id)
 
-      must_respond_with :success
+        must_respond_with :success
+      end
+
+      it "renders 404 not_found for a bogus work ID" do
+        perform_login
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      destroyed_id = existing_work.id
-      existing_work.destroy
+    describe "logged out user" do
+      it "redirects to root path for logged out user" do
+        get work_path(existing_work.id)
 
-      get work_path(destroyed_id)
-
-      must_respond_with :not_found
+        must_redirect_to root_path
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must be logged in to do that."
+      end
     end
   end
 
@@ -188,20 +218,41 @@ describe WorksController do
   end
 
   describe "upvote" do
-    it "redirects to the work page if no user is logged in" do
-      skip
+    describe "logged out user" do
+      it "redirects to the work page if no user is logged in" do
+        post upvote_path(existing_work)
+        expect(flash[:result_text]).must_equal "You must log in to do that."
+
+        must_redirect_to work_path(existing_work)
+      end
     end
 
-    it "redirects to the work page after the user has logged out" do
-      skip
-    end
+    describe "logged in user" do
+      it "redirects to the work page after the user has logged out" do
+        perform_login
+        delete logout_path
 
-    it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
-    end
+        must_redirect_to root_path
+      end
 
-    it "redirects to the work page if the user has already voted for that work" do
-      skip
+      it "succeeds for a logged-in user and a fresh user-vote pair" do
+        work = works(:another_album)
+
+        perform_login
+
+        post upvote_path(work)
+
+        expect(flash[:result_text]).must_equal "Successfully upvoted!"
+      end
+
+      it "redirects to the work page if the user has already voted for that work" do
+        perform_login
+
+        post upvote_path(existing_work)
+
+        expect(flash[:result_text]).must_equal "Could not upvote"
+        must_redirect_to work_path(existing_work)
+      end
     end
   end
 end

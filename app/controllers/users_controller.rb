@@ -25,7 +25,7 @@ class UsersController < ApplicationController
         flash[:status] = :success
         flash[:result_text] = "Logged in as new user #{user.username}"
       else
-        flash.now[:status] = :failure
+        flash[:status] = :failure
         flash.now[:result_text] = "Could not create new user account: #{user.errors.messages}"
         return redirect_to root_path
       end
