@@ -196,7 +196,7 @@ describe WorksController do
       }.wont_change "Vote.count"
 
       must_respond_with :redirect
-      must_redirect_to work_path(work_id)
+      must_redirect_to root_path
     end
 
     it "redirects to the work page after the user has logged out" do
