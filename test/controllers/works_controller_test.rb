@@ -35,6 +35,8 @@ describe WorksController do
 
   describe "index" do
     it "succeeds when there are works and user is logged in" do
+      user = users(:grace)
+      perform_login(user)
       get works_path
 
       must_respond_with :success
@@ -45,6 +47,8 @@ describe WorksController do
         work.destroy
       end
 
+      user = users(:grace)
+      perform_login(user)
       get works_path
 
       must_respond_with :success
@@ -101,7 +105,9 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
+    it "succeeds for an extant work ID when user is logged in" do
+      user = users(:grace)
+      perform_login(user)
       get work_path(existing_work.id)
 
       must_respond_with :success
@@ -110,10 +116,17 @@ describe WorksController do
     it "renders 404 not_found for a bogus work ID" do
       destroyed_id = existing_work.id
       existing_work.destroy
+      user = users(:grace)
+      perform_login(user)
 
       get work_path(destroyed_id)
 
       must_respond_with :not_found
+    end
+
+    it "redirects when no user is logged in" do
+      get work_path(Work.first)
+      must_redirect_to root_path
     end
   end
 
