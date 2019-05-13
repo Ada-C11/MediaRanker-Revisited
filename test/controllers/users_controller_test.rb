@@ -29,11 +29,15 @@ describe UsersController do
 
   describe "show" do
     it "responds with success if user exists" do
+      perform_login(user_one)
+
       get user_path(user_one.id)
       must_respond_with :success
     end
 
     it "responds with a 404 if user does not exist" do
+      perform_login(user_one)
+
       get user_path(-1)
       must_respond_with :not_found
     end
