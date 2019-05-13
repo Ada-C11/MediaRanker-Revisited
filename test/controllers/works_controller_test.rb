@@ -34,13 +34,13 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
+    it "succeeds when there are works and user is logged in" do
       get works_path
 
       must_respond_with :success
     end
 
-    it "succeeds when there are no works" do
+    it "succeeds when there are no works and user is logged in" do
       Work.all do |work|
         work.destroy
       end
@@ -48,6 +48,11 @@ describe WorksController do
       get works_path
 
       must_respond_with :success
+    end
+
+    it "redirects to root with error when user is not logged in" do
+      get works_path
+      must_redirect_to root_path
     end
   end
 
