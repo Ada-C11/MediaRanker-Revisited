@@ -11,7 +11,13 @@ class WorksController < ApplicationController
   end
 
   def index
-    @works_by_category = Work.to_category_hash
+    if @login_user
+      @works_by_category = Work.to_category_hash
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to see this page!"
+      redirect_to root_path
+    end
   end
 
   def new
@@ -34,7 +40,13 @@ class WorksController < ApplicationController
   end
 
   def show
-    @votes = @work.votes.order(created_at: :desc)
+    if @login_user
+      @votes = @work.votes.order(created_at: :desc)
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to see this page!"
+      redirect_to root_path
+    end
   end
 
   def edit
