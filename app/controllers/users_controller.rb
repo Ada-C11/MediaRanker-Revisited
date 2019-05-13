@@ -26,8 +26,8 @@ class UsersController < ApplicationController
         return redirect_to root_path
       end
     end
-    session[:user_id] = user.id
 
+    session[:user_id] = user.id
     return redirect_to root_path
   end
 

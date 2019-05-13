@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   has_many :votes
   has_many :ranked_works, through: :votes, source: :work
-  validates :user, presence: true, uniqueness: true
+  validates :username, presence: true
 
   def self.build_from_github(auth_hash)
     user = User.new
