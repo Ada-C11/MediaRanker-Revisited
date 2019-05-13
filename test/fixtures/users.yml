@@ -2,9 +2,14 @@
 
 dan:
   username: dan
+  name: dan
 
 kari:
   username: kari
+<<<<<<< HEAD
+=======
+  name: kari
+>>>>>>> wave2
 
 ada:
   provider: github
