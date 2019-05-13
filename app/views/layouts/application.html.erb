@@ -48,7 +48,7 @@
     </nav>
   </header>
 
-  <% if flash[:result_text] or flash[:messages] or flash[:success] %>
+  <% if flash[:result_text] or flash[:messages] or flash[:success] or flash[:error] %>
     <section class="alert__container">
       <div class="alert alert-<%= flash[:status].to_s == 'failure' ? 'warning' : flash[:status] %>">
         <span><%= flash[:status].to_s == "failure" ? "A problem occurred: " : "" %><%= flash[:result_text] %></span>
@@ -62,10 +62,21 @@
           </ul>
         <% end %>
       </div>
+      <% if flash[:error]%>
+       <div class= "alert alert-danger" >
+       <span> <%=flash[:error]  %></span>
+       </div>
+       <%end%>
     </section>
-    <section class= "alert alert-success" >
+    
+      <% if flash[:success]%>
+      <div class= "alert alert-success" >
        <span> <%=flash[:success]  %></span>
-       </section>
+       </div>
+      <%end%>
+
+       
+
   <% end %>
 
   <main>
