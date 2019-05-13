@@ -6,10 +6,6 @@ Rails.application.routes.draw do
 
   get "/auth/:provider/callback", to: "users#login", as: "auth_callback"
 
-  # get "/login", to: "users#login_form", as: "login"
-  # post "/login", to: "users#login"
-  # post "/logout", to: "users#logout", as: "logout"
-
   resources :works
   post "/works/:id/upvote", to: "works#upvote", as: "upvote"
 

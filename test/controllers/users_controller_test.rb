@@ -64,4 +64,24 @@ describe UsersController do
       must_redirect_to root_path
     end
   end
+
+  describe "destroy" do
+    it "can logout a user" do
+      user = User.first
+
+      perform_login(user)
+      logout_data = {
+        user: {
+          username: user.username,
+        },
+      }
+      delete logout_path, params: logout_data
+
+      expect(session[:user_id]).must_be_nil
+
+      expect(flash[:status]).must_equal :success
+      expect(flash[:result_text]).must_equal "Successfully logged out!"
+      must_redirect_to root_path
+    end
+  end
 end
