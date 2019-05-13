@@ -233,4 +233,83 @@ describe WorksController do
       end
     end
   end
+
+  describe "Guest users" do
+    it "Upvote requires login" do
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count"
+
+      must_redirect_to root_path
+
+      check_flash(:failure)
+    end
+
+    it "Index requires login" do
+      get works_path
+
+      must_respond_with :redirect
+
+      must_redirect_to root_path
+
+      check_flash(:failure)
+    end
+
+    it "New requires login" do
+      get new_work_path
+
+      must_respond_with :redirect
+      must_redirect_to root_path
+      
+      check_flash(:failure)
+    end
+
+    it "Create requires login" do
+      test_work = { work: 
+                    { title: "A Work of Art", category: "album" } 
+                  }
+
+      expect {
+        post works_path, params: test_work
+      }.wont_change "Work.count"
+
+      must_redirect_to root_path
+
+      check_flash(:failure)
+    end
+
+    it "Show requires login" do
+      get work_path(Work.first)
+
+      must_redirect_to root_path
+    end
+
+    it "Edit requires login" do
+      get work_path(Work.first)
+      
+      must_redirect_to root_path
+    end
+
+    it "Update requires login" do
+      update = { work: 
+                  { title: "Renamed title" } 
+                }
+
+      expect {
+        put work_path(existing_work), params: update
+      }.wont_change "Work.count"
+
+      must_redirect_to root_path
+      check_flash(:failure)
+    end
+
+    it "Destroy requires login" do
+      expect {
+        delete work_path(existing_work.id)
+      }.wont_change "Work.count"
+
+      must_redirect_to root_path
+      check_flash(:failure)
+    end
+  end
 end
