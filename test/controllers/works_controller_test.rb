@@ -239,6 +239,14 @@ describe WorksController do
     end
 
     it "redirects to the work page if a logged in user tries to upvote a work that does not exist" do
+      perform_login
+      work_id = 3490
+
+      expect {
+        post upvote_path(work_id)
+      }.wont_change "Vote.count"
+
+      must_respond_with :not_found
     end
   end
 end
