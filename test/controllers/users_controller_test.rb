@@ -43,9 +43,9 @@ describe UsersController do
     end
 
     it "can log in a new user" do
-      new_user = User.new(uid: 999, provider: "github", email: "test@test.com", name: "angela")
+      new_user = User.new(uid: 999, provider: "github", email: "test@test.com", username: "angela")
       expect { perform_login(new_user) }.must_change "User.count", 1
-      user = User.find_by(uid: new_user.uid)
+      user = User.find_by(uid: new_user.uid, provider: new_user.provider)
 
       expect(flash[:status]).must_equal :success
       expect(flash[:result_text]).must_equal "Logged in as new user #{user.name}"
