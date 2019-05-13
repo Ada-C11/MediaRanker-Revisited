@@ -2,6 +2,7 @@ require "test_helper"
 
 describe WorksController do
   let(:existing_work) { works(:album) }
+  let(:user) { User.first }
 
   describe "root" do
     it "succeeds with all media types" do
@@ -194,17 +195,37 @@ describe WorksController do
 
       post upvote_path(existing_work.id)
 
-      must_respond_with :redirect
       must_redirect_to work_path(existing_work.id)
 
       existing_work.reload
 
       expect(existing_work.votes.length).must_equal vote_count
       expect(Vote.all.length).must_equal votes
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login(user)
+      logout_data = {
+        user: {
+          username: user.username,
+        },
+      }
+      delete logout_path, params: logout_data
+
+      vote_count = existing_work.votes.length
+      votes = Vote.all.length
+
+      post upvote_path(existing_work.id)
+
+      must_redirect_to work_path(existing_work.id)
+
+      existing_work.reload
+
+      expect(existing_work.votes.length).must_equal vote_count
+      expect(Vote.all.length).must_equal votes
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
