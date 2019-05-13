@@ -1,7 +1,7 @@
 require "test_helper"
+require "pry"
 
 describe UsersController do
-
   describe "create" do
     it "logs in an existing user" do
       # Arrange
@@ -19,12 +19,13 @@ describe UsersController do
     end
 
     it "creates a new user and redirects to the root" do
+
       start_count = User.count
-      new_user = User.new(provider: "github", uid: 99999, username: "test_user", email: "test@user.com")
-  
-      OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(new_user))
-      get auth_callback_path(:github)
-  
+      # Test would not pass with user.new for some reason
+      user = User.create(provider: "github", uid: 99999, username: "test_user", email: "test@user.com")
+
+      perform_login(user)
+
       must_redirect_to root_path
   
       # Should have created a new user
@@ -39,6 +40,7 @@ describe UsersController do
       user = User.new(provider: 'github', uid: 1, username: '', email: 'test@user.com')
   
       OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
+
       get auth_callback_path(:github)
   
       must_redirect_to root_path

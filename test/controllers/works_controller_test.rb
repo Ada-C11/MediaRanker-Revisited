@@ -55,11 +55,10 @@ describe WorksController do
     end
 
     describe "logged out user" do
-      it "redirects to home page and shows flash msg" do
+      it "redirects to root path and displays flash message" do
         get works_path
         must_respond_with :redirect
         must_redirect_to root_path
-
         expect(flash[:status]).must_equal :failure
         expect(flash[:result_text]).must_equal "You must be logged in to do that."
       end
@@ -254,5 +253,6 @@ describe WorksController do
         must_redirect_to work_path(existing_work)
       end
     end
+
   end
 end
