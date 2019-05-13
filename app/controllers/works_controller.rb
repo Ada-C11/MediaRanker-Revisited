@@ -21,10 +21,22 @@ class WorksController < ApplicationController
   end
 
   def new
+    if @login_user.nil?
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to see this page!"
+      return redirect_to root_path
+    end
+
     @work = Work.new
   end
 
   def create
+    if @login_user.nil?
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to see this page!"
+      return redirect_to root_path
+    end
+
     @work = Work.new(media_params)
     @media_category = @work.category
     if @work.save
@@ -53,6 +65,12 @@ class WorksController < ApplicationController
   end
 
   def update
+    if @login_user.nil?
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to see this page!"
+      return redirect_to root_path
+    end
+
     @work.update_attributes(media_params)
     if @work.save
       flash[:status] = :success
@@ -67,6 +85,12 @@ class WorksController < ApplicationController
   end
 
   def destroy
+    if @login_user.nil?
+      flash[:status] = :failure
+      flash[:result_text] = "You must be logged in to see this page!"
+      return redirect_to root_path
+    end
+
     @work.destroy
     flash[:status] = :success
     flash[:result_text] = "Successfully destroyed #{@media_category.singularize} #{@work.id}"
