@@ -60,4 +60,25 @@ describe UsersController do
     # The new user's ID should be set in the session
     session[:user_id].must_equal User.last.id
   end
+  describe "logout" do
+    it "logs out user if they are logged in" do
+      user = users(:grace)
+      perform_login(user)
+      expect(session[:user_id]).must_equal user.id
+
+      delete logout_path
+
+      must_redirect_to root_path
+
+      expect(session[:user_id]).must_be_nil
+    end
+
+    it "redirects to root path if there is no user logged in" do
+      delete logout_path
+
+      must_redirect_to root_path
+
+      expect(session[:user_id]).must_be_nil
+    end
+  end
 end
