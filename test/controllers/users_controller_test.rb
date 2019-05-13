@@ -1,8 +1,6 @@
 require "test_helper"
 
 describe UsersController do
-  let(:user) { users(:user1) }
-
   describe "index" do
     it "should get index when users exist" do
       get users_path
@@ -22,28 +20,28 @@ describe UsersController do
 
   describe "login" do
     it "can log in an existing user" do
-      user = perform_login
+      returning_user = users(:user1)
 
       expect {
-        user = perform_login(user)
+        perform_login(returning_user)
       }.wont_change "User.count"
 
-      expect(session[:user_id]).must_equal user.id
+      expect(session[:user_id]).must_equal returning_user.id
 
       expect(flash[:status]).must_equal :success
-      expect(flash[:result_text]).must_equal "Logged in as returning user #{user.name}"
+      expect(flash[:result_text]).must_equal "Logged in as returning user #{returning_user.name}"
 
       must_redirect_to root_path
     end
 
     it "can log in a new user" do
-      user = User.new(provider: "github", username: "lola_cat", uid: 987, email: "lola@justcatthings.com")
+      new_user = User.new(provider: "github", username: "lola_cat", uid: 987, email: "lola@justcatthings.com")
 
       expect {
-        perform_login(user)
+        perform_login(new_user)
       }.must_change "User.count", 1
 
-      user = User.find_by(uid: user.uid, provider: user.provider)
+      user = User.find_by(uid: new_user.uid, provider: new_user.provider)
 
       expect(session[:user_id]).must_equal user.id
       expect(flash[:status]).must_equal :success
@@ -53,14 +51,17 @@ describe UsersController do
     end
 
     it "flashes an error if new user could not be created" do
-      user = User.new(provider: nil, username: "bad_user", uid: nil, email: "bad_user@badplace.com")
+      OmniAuth.config.mock_auth[:github] = nil
+
+      get auth_callback_path(:github)
 
       expect {
-        perform_login(user)
+        get auth_callback_path(:github)
       }.wont_change "User.count"
 
-      expect(flash[:status]).must_equal :error
-      expect(flash[:result_text]).must_equal "Could not create new user account: {:uid=>[\"can't be blank\"]}"
+      expect(flash[:result_text]).must_equal "Could not create new user account: {:username=>[\"can't be blank\"]}"
+
+      must_redirect_to root_path
     end
   end
 end
