@@ -5,39 +5,47 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find_by(id: params[:id])
-    render_404 unless @user
-  end
-
-  def login_form
+    if !@user
+      flash[:status] = :failure
+      flash[:result_text] = "User not found!"
+      redirect_to root_path
+    end
   end
 
   def login
-    username = params[:username]
-    if username and user = User.find_by(username: username)
-      session[:user_id] = user.id
-      flash[:status] = :success
-      flash[:result_text] = "Successfully logged in as existing user #{user.username}"
+    auth_hash = request.env["omniauth.auth"]
+
+    user = User.find_by(uid: auth_hash[:uid], provider: "github")
+    if user
+      flash[:success] = "Logged in as returning user #{user.username}"
     else
-      user = User.new(username: username)
+      user = User.build_from_github(auth_hash)
+
       if user.save
-        session[:user_id] = user.id
-        flash[:status] = :success
-        flash[:result_text] = "Successfully created new user #{user.username} with ID #{user.id}"
+        flash[:success] = "Logged in as new user #{user.username}"
       else
-        flash.now[:status] = :failure
-        flash.now[:result_text] = "Could not log in"
-        flash.now[:messages] = user.errors.messages
-        render "login_form", status: :bad_request
-        return
+        flash[:status] = :failure
+        flash[:result_text] = "Could not create new user account."
+        return redirect_to root_path
       end
     end
-    redirect_to root_path
+
+    session[:user_id] = user.id
+    return redirect_to root_path
+  end
+
+  def current
+    @current_user = User.find_by(id: session[:user_id])
+    if @current_user.nil?
+      flash[:error] = "You must be logged in first!"
+      redirect_to users_path
+    end
   end
 
   def logout
+    user = User.find_by(id: session[:user_id])
     session[:user_id] = nil
-    flash[:status] = :success
-    flash[:result_text] = "Successfully logged out"
+    flash[:notice] = "Logged out #{user.username}"
     redirect_to root_path
   end
 end
