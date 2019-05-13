@@ -3,6 +3,7 @@ require "test_helper"
 describe UsersController do
   describe "index" do
     it "lists all users" do
+      perform_login
       get users_path
       must_respond_with :success
     end
@@ -10,7 +11,8 @@ describe UsersController do
 
   describe "show" do
     it "should display show page for user" do
-      user = users(:ada).id
+      user = perform_login(users(:ada))
+      # user = users(:ada).id
       get users_path(user)
       must_respond_with :success
     end
@@ -20,12 +22,13 @@ describe UsersController do
       users(:ada).destroy
       get user_path(user)
       must_respond_with :redirect
-      expect(flash[:error]).must_equal "Couldn't find user!"
+      expect(flash[:error]).must_equal "You must be logged in to do this action"
     end
   end
 
   describe "Create" do
     it "logs in an existing user and redirects to the root route" do
+      perform_login
       # Count the users, to make sure we're not (for example) creating
       # a new user every time we get a login request
       start_count = User.count
@@ -93,12 +96,13 @@ describe UsersController do
       get current_user_path
 
       must_respond_with :redirect
-      expect(flash[:error]).must_equal "You must be logged in first!"
+      expect(flash[:error]).must_equal "You must be logged in to do this action"
     end
   end
 
   describe "destroy" do
     it "will close the session an redirect to root path" do
+      perform_login
       user = users(:ada)
       perform_login(user)
       delete logout_path
