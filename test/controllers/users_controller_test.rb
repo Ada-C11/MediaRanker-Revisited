@@ -63,4 +63,17 @@ describe UsersController do
       expect(flash[:result_text]).must_equal "Could not create new user account: "
     end
   end
+
+  describe "destroy" do
+    it "can log out a user" do
+      perform_login(user_one)
+      expect(flash[:result_text]).must_equal "Logged in as returning user #{user_one.name}"
+      expect(session[:user_id]).wont_be_nil
+
+      delete logout_path
+      expect(session[:user_id]).must_be_nil
+      expect(flash[:result_text]).must_equal "Successfully logged out!"
+      must_redirect_to root_path
+    end
+  end
 end
