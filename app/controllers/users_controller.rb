@@ -24,7 +24,7 @@ class UsersController < ApplicationController
         flash.now[:status] = :failure
         flash.now[:result_text] = "Could not log in"
         flash.now[:messages] = user.errors.messages
-        render "login_form", status: :bad_request
+        redirect_to root_path, status: :bad_request
         return
       end
     end
