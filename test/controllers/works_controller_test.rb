@@ -281,7 +281,7 @@ describe WorksController do
       work = works(:poodr)
       perform_login(user)
       post upvote_path(work.id)
-      get logout_path
+      delete logout_path
 
       must_respond_with :redirect
       must_redirect_to root_path
