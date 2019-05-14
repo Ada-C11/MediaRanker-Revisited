@@ -188,20 +188,64 @@ describe WorksController do
   end
 
   describe "upvote" do
+    let(:existing_work) { works(:poodr) }
     it "redirects to the work page if no user is logged in" do
-      skip
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count"
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
+
+      must_respond_with :redirect
+      must_redirect_to work_path(existing_work.id)
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login
+      delete logout_path
+      expect {
+        post upvote_path(existing_work.id)
+      }.wont_change "Vote.count"
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "You must log in to do that"
+
+      must_respond_with :redirect
+      must_redirect_to work_path(existing_work.id)
     end
 
-    it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
-    end
+    describe "as a logged in user" do
+      before do
+        perform_login
+      end
+      it "succeeds for a logged-in user and a fresh user-vote pair" do
+        expect {
+          post upvote_path(existing_work.id)
+        }.must_change "Vote.count", 1
 
-    it "redirects to the work page if the user has already voted for that work" do
-      skip
+        expect(flash[:status]).must_equal :success
+        expect(flash[:result_text]).must_equal "Successfully upvoted!"
+
+        must_respond_with :redirect
+        must_redirect_to work_path(existing_work.id)
+      end
+
+      it "redirects to the work page if the user has already voted for that work" do
+        expect {
+          post upvote_path(existing_work.id)
+        }.must_change "Vote.count", 1
+        expect {
+          post upvote_path(existing_work.id)
+        }.wont_change "Vote.count"
+
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "Could not upvote"
+        expect(flash[:messages]).must_equal :user=>["has already voted for this work"]
+
+        must_respond_with :redirect
+        must_redirect_to work_path(existing_work.id) 
+      end
     end
   end
 end
