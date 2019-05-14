@@ -24,7 +24,8 @@ class UsersController < ApplicationController
         flash[:status] = :success
         flash[:result_text] = "Logged in as new user #{user.username}"
       else
-        flash[:error] = "Could not create new user account: #{user.errors.messages}"
+        flash[:status] = :error
+        flash[:result_text] = "Could not create new user account: #{user.errors.messages}"
         return redirect_to root_path
       end
     end
@@ -34,9 +35,14 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    session[:user_id] = nil
-    flash[:status] = :success
-    flash[:result_text] = "Successfully logged out!"
+    if session[:user_id]
+      session[:user_id] = nil
+      flash[:status] = :success
+      flash[:result_text] = "Successfully logged out!"
+    else
+      flash[:status] = :error
+      flash[:result_text] = "There's no logged in user, so there's no one to log out!"
+    end
 
     redirect_to root_path
   end

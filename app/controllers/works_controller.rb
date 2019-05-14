@@ -63,9 +63,8 @@ class WorksController < ApplicationController
   end
 
   def upvote
-    flash[:status] = :failure
-    if @login_user
-      vote = Vote.new(user: @login_user, work: @work)
+    if session[:user_id]
+      vote = Vote.new(user: User.find_by(id: session[:user_id]), work: @work)
       if vote.save
         flash[:status] = :success
         flash[:result_text] = "Successfully upvoted!"
@@ -77,6 +76,7 @@ class WorksController < ApplicationController
     else
       flash[:status] = :error
       flash[:result_text] = "You must log in to do that"
+      redirect_to root_path
     end
 
     # Refresh the page to show either the updated vote count
