@@ -20,12 +20,9 @@ Minitest::Reporters.use!(
 # require "minitest/pride"
 
 class ActiveSupport::TestCase
-  # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
-  # Add more helper methods to be used by all tests here...
 
   def setup
-    # Tell OmniAuth Gem that we're in Test Mode
     OmniAuth.config.test_mode = true
   end
 
