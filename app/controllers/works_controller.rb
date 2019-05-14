@@ -4,6 +4,8 @@ class WorksController < ApplicationController
   before_action :category_from_work, except: [:root, :index, :new, :create]
   before_action :authenticate, except: [:root, :upvote]
 
+  before_action :authorize, only: [:edit, :update, :destroy]
+
   def root
     @albums = Work.best_albums
     @books = Work.best_books
@@ -98,6 +100,14 @@ class WorksController < ApplicationController
     unless @login_user
       flash[:status] = :failure
       flash[:result_text] = "You must be logged in to see this page"
+      redirect_to root_path
+    end
+  end
+
+  def authorize
+    unless @login_user == @work.user
+      flash[:status] = :failure
+      flash[:result_text] = "You are not authorized to perform this action"
       redirect_to root_path
     end
   end
