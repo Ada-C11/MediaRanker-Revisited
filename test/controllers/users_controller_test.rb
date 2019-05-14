@@ -91,24 +91,31 @@ describe UsersController do
       User.count.must_equal start_count
     end
 
-    it "redirects to the login route if given invalid user data" do
+    it "redirects to the login route if given invalid user data (empty username)" do
+      start_count = User.count
+      invalid = User.new(provider: "github", uid: 9496, username: "", email: "")
+      OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(invalid))
+      get auth_callback_path(:github)
+      must_redirect_to root_path
+      User.count.must_equal start_count
     end
-  end
 
-  it "creates a new user" do
-    start_count = User.count
-    user = User.new(provider: "github", uid: 99999, username: "nilaiparixitpatel", email: "test@user.com")
+    it "creates a new user" do
+      start_count = User.count
+      user = User.new(provider: "github", uid: 99999, username: "nilaiparixitpatel", email: "test@user.com")
+    
+      # OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
+      # get auth_callback_path(:github)
+      perform_login(user)
+      must_redirect_to root_path
+   
+      # Should have created a new user
+      User.count.must_equal start_count + 1
+    
+      # The new user's ID should be set in the session
+      session[:user_id].must_equal User.last.id
+    end
   
-    OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
-    get auth_callback_path(:github)
- 
-    must_redirect_to root_path
- 
-    # Should have created a new user
-    User.count.must_equal start_count + 1
-  
-    # The new user's ID should be set in the session
-    session[:user_id].must_equal User.last.id
   end
 
 end
