@@ -1,6 +1,8 @@
 class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
+  before_action :not_logged_in, only: [:show, :index, :new]
+  # :edit, :destroy]
   before_action :category_from_work, except: [:root, :index, :new, :create]
 
   def root
@@ -38,6 +40,7 @@ class WorksController < ApplicationController
   end
 
   def edit
+    raise
   end
 
   def update
@@ -68,6 +71,8 @@ class WorksController < ApplicationController
       if vote.save
         flash[:status] = :success
         flash[:result_text] = "Successfully upvoted!"
+        binging.pry
+        # so why does that binding.pry not get hit on the test?
       else
         flash[:result_text] = "Could not upvote"
         flash[:messages] = vote.errors.messages
