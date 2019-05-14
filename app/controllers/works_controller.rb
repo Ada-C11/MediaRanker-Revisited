@@ -2,6 +2,8 @@ class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
   before_action :category_from_work, except: [:root, :index, :new, :create]
+  before_action :require_login, except: [:root]
+
 
   def root
     @albums = Work.best_albums
@@ -12,6 +14,10 @@ class WorksController < ApplicationController
 
   def index
     @works_by_category = Work.to_category_hash
+  end
+
+  def show
+    @votes = @work.votes.order(created_at: :desc)
   end
 
   def new
@@ -33,12 +39,7 @@ class WorksController < ApplicationController
     end
   end
 
-  def show
-    @votes = @work.votes.order(created_at: :desc)
-  end
-
-  def edit
-  end
+  def edit; end
 
   def update
     @work.update_attributes(media_params)
@@ -74,11 +75,12 @@ class WorksController < ApplicationController
       end
     else
       flash[:result_text] = "You must log in to do that"
+
     end
+    redirect_back fallback_location: work_path(@work)
 
     # Refresh the page to show either the updated vote count
     # or the error message
-    redirect_back fallback_location: work_path(@work)
   end
 
   private
