@@ -188,20 +188,51 @@ describe WorksController do
   end
 
   describe "upvote" do
-    it "redirects to the work page if no user is logged in" do
-      skip
+    describe "logged in" do
+      let(:user) { users(:dan) }
+
+      it "succeeds for a logged-in user and a fresh user-vote pair" do
+        Vote.delete_all
+        perform_login(user)
+
+        expect {
+          post upvote_path(existing_work.id)
+        }.must_change "Vote.count", 1
+
+        expect(flash[:result_text]).must_equal "Successfully upvoted!"
+        expect(existing_work.vote_ids.first).must_equal Vote.first.id
+        expect(user.vote_ids.first).must_equal Vote.first.id
+        must_respond_with :redirect
+      end
+
+      it "redirects to the work page if the user has already voted for that work" do
+        perform_login(user)
+        vote = Vote.new(user: user, work: existing_work)
+        vote.save
+
+        expect {
+          post upvote_path(existing_work.id)
+        }.wont_change "Vote.count"
+        expect(flash[:result_text]).must_equal "Could not upvote"
+        expect(flash[:messages][:user]).must_equal ["has already voted for this work"]
+        must_redirect_to work_path(existing_work.id)
+      end
+
+      it "redirects to the work page after the user has logged out" do
+        perform_login(user)
+        delete logout_path(user)
+
+        must_redirect_to root_path
+      end
     end
 
-    it "redirects to the work page after the user has logged out" do
-      skip
-    end
+    describe "logged out" do
+      it "redirects to the work page if no user is logged in" do
+        post upvote_path(existing_work)
 
-    it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
-    end
-
-    it "redirects to the work page if the user has already voted for that work" do
-      skip
+        expect(flash[:result_text]).must_equal "You must log in to do that"
+        must_redirect_to work_path(existing_work)
+      end
     end
   end
 end
