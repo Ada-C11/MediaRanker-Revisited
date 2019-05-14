@@ -76,41 +76,41 @@ describe WorksController do
     describe "new" do
       it "succeeds" do
         get new_work_path
-  
+
         must_respond_with :success
       end
     end
-  
+
     describe "create" do
       it "creates a work with valid data for a real category" do
         new_work = { work: { title: "Dirty Computer", category: "album" } }
-  
+
         expect {
           post works_path, params: new_work
         }.must_change "Work.count", 1
-  
+
         new_work_id = Work.find_by(title: "Dirty Computer").id
-  
+
         must_respond_with :redirect
         must_redirect_to work_path(new_work_id)
       end
-  
+
       it "renders bad_request and does not update the DB for bogus data" do
         bad_work = { work: { title: nil, category: "book" } }
-  
+
         expect {
           post works_path, params: bad_work
         }.wont_change "Work.count"
-  
+
         must_respond_with :bad_request
       end
-  
+
       it "renders 400 bad_request for bogus categories" do
         INVALID_CATEGORIES.each do |category|
           invalid_work = { work: { title: "Invalid Work", category: category } }
-  
+
           proc { post works_path, params: invalid_work }.wont_change "Work.count"
-  
+
           Work.find_by(title: "Invalid Work", category: category).must_be_nil
           must_respond_with :bad_request
         end
@@ -193,21 +193,85 @@ describe WorksController do
     end
 
     describe "upvote" do
-      it "redirects to the work page if no user is logged in" do
-        skip
-      end
-
       it "redirects to the work page after the user has logged out" do
-        skip
+        delete logout_path
+
+        expect {
+          post upvote_path(existing_work.id)
+        }.wont_change "existing_work.votes.count"
+
+        must_redirect_to work_path(existing_work)
       end
 
       it "succeeds for a logged-in user and a fresh user-vote pair" do
-        skip
+        expect {
+          post upvote_path(works(:poodr)) 
+        }.must_change "Vote.count", +1
       end
 
       it "redirects to the work page if the user has already voted for that work" do
-        skip
+        expect {
+          post upvote_path(existing_work.id) 
+        }.wont_change "existing_work.votes.count"
+
+        must_respond_with :redirect
+        must_redirect_to work_path(existing_work) 
       end
+    end
+  end
+
+  describe "guest user" do
+    it "requires a login for new" do
+      get new_work_path
+      must_redirect_to root_path
+    end
+
+    it "requires a login for create" do
+      work_data = {
+        work: {
+          title: "Create a new work",
+          category: "album"
+        },
+      }
+
+      expect {
+        post works_path, params: work_data
+      }.wont_change "Work.count"
+
+      must_redirect_to root_path
+    end
+
+    it "requires a login for edit" do
+      get edit_work_path(Work.first)
+      must_redirect_to root_path
+    end
+
+    it "requires a login for update" do
+      old_title = Work.first.title
+      work_data = {
+        work: {
+          title: old_title + " an edit",
+          author_id: "album",
+        },
+      }
+
+      patch work_path(Work.first), params: work_data
+
+      expect(Work.first.title).must_equal old_title
+      must_redirect_to root_path
+    end
+
+    it "requires a login for destroy" do
+      expect {
+        delete work_path(Work.first)
+      }.wont_change "Work.count"
+      must_redirect_to root_path
+    end
+
+    it "requires a login for upvote" do
+      # "redirects to the work page if no user is logged in" do
+      post upvote_path(existing_work.id) 
+      must_redirect_to root_path
     end
   end
 end

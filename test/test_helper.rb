@@ -48,6 +48,7 @@ def perform_login(user = nil)
 
     get auth_callback_path("github")
 
+    puts "totally logged in"
     return user
   end
 end
