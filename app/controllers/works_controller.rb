@@ -75,6 +75,7 @@ class WorksController < ApplicationController
       end
     else
       flash[:result_text] = "You must log in to do that"
+
     end
     redirect_back fallback_location: work_path(@work)
 
