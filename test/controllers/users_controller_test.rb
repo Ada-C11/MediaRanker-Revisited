@@ -40,4 +40,18 @@ describe UsersController do
       User.count.must_equal start_count
     end
   end
+
+  describe "logout" do
+    it "resets session_id to nil" do
+      user = users(:grace)
+
+      perform_login(user)
+
+      delete logout_path
+      must_respond_with :redirect
+
+      expect(session[:user_id]).must_be_nil
+      must_redirect_to root_path
+    end
+  end
 end
