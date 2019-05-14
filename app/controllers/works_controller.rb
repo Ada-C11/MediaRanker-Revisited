@@ -23,6 +23,7 @@ class WorksController < ApplicationController
 
   def create
     @work = Work.new(media_params)
+    @work.user_id = session[:user_id]
     @media_category = @work.category
     if @work.save
       flash[:status] = :success
@@ -41,6 +42,12 @@ class WorksController < ApplicationController
   end
 
   def edit
+    if !Work.owned_by_user?(@work, @login_user)
+      # if @work.user_id != session[:user_id]
+      # raise
+      flash[:error] = "You can only modify works you have created"
+      redirect_to work_path(@work.id)
+    end
   end
 
   def update
@@ -58,10 +65,15 @@ class WorksController < ApplicationController
   end
 
   def destroy
-    @work.destroy
-    flash[:status] = :success
-    flash[:result_text] = "Successfully destroyed #{@media_category.singularize} #{@work.id}"
-    redirect_to root_path
+    if Work.owned_by_user?(@work, @login_user)
+      @work.destroy
+      flash[:status] = :success
+      flash[:result_text] = "Successfully destroyed #{@media_category.singularize} #{@work.id}"
+      redirect_to root_path
+    else
+      flash[:error] = "You can only delete works you have created"
+      redirect_to work_path(@work.id)
+    end
   end
 
   def upvote
@@ -87,7 +99,7 @@ class WorksController < ApplicationController
   private
 
   def media_params
-    params.require(:work).permit(:title, :category, :creator, :description, :publication_year)
+    params.require(:work).permit(:title, :category, :creator, :description, :publication_year, :user_id)
   end
 
   def category_from_work
