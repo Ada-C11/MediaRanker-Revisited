@@ -45,6 +45,7 @@ class UsersController < ApplicationController
         # way we've configured GitHub. Our strategy will
         # be to display error messages to make future
         # debugging easier.
+        puts "#{user.errors.messages}"
         flash[:error] = "Could not create new user account: #{user.errors.messages}"
         return redirect_to root_path
       end
@@ -53,14 +54,6 @@ class UsersController < ApplicationController
     # If we get here, we have a valid user instance
     session[:user_id] = user.id
     return redirect_to root_path
-  end
-
-  def current
-    @user = User.find_by(id: session[:user_id])
-    if @user.nil?
-      flash[:error] = "You must be logged in first!"
-      redirect_to root_path
-    end
   end
 
   def logout
