@@ -12,6 +12,6 @@ Rails.application.routes.draw do
 
   # oauth login/logout
   get "/auth/github", as: "github_login"
-  get "/auth/:provider/callback", to: "users#create"
+  get "/auth/:provider/callback", to: "users#create", as: 'github_callback'
   delete '/logout', to: 'users#destroy', as: "logout"
 end

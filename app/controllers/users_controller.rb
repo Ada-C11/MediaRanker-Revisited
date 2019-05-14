@@ -1,3 +1,5 @@
+require 'pry'
+
 class UsersController < ApplicationController
   def index
     @users = User.all
@@ -12,8 +14,9 @@ class UsersController < ApplicationController
   end
 
   def create
+    # binding.pry
     auth_hash = request.env["omniauth.auth"]
-
+    
     user = User.find_by(uid: auth_hash[:uid], provider: "github")
     if user
       # User was found in the database
