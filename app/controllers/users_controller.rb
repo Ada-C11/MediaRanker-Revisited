@@ -33,9 +33,15 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    session[:user_id] = nil
-    flash[:status] = :success
-    flash[:result_text] = "Successfully logged out"
+    if session[:user_id]
+      session[:user_id] = nil
+      flash[:status] = :success
+      flash[:result_text] = "Successfully logged out"
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "No logged in user to logout"
+    end
+
     redirect_to root_path
   end
 end
