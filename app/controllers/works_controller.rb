@@ -1,5 +1,3 @@
-require "pry"
-
 class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
