@@ -3,8 +3,6 @@ Rails.application.routes.draw do
   root "works#root"
 
   delete "/logout", to: "users#logout", as: "logout"
-
-  #get "/users/current", to: "users#current", as: "current_user"
   get "/auth/github", as: "github_login"
   get "/auth/:provider/callback", to: "users#create", as: "auth_callback"
 
