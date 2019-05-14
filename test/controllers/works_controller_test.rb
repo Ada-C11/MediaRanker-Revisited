@@ -38,6 +38,30 @@ describe WorksController do
       delete logout_path
     end
 
+    describe "index" do
+      it "redirects when not logged in" do
+        expect(session[:user_id]).must_be_nil
+
+        get works_path
+
+        check_flash(expected_status = :failure)
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
+    end
+
+    describe "show" do
+      it "redirects when not logged in" do
+        get work_path(existing_work)
+
+        check_flash(expected_status = :failure)
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
+    end
+
     describe "upvote" do
       it "redirects to the works page if no user is logged in" do
         expect(session[:user_id]).must_be_nil
