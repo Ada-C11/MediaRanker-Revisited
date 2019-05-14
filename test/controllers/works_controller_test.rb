@@ -1,6 +1,10 @@
 require "test_helper"
 
 describe WorksController do
+  before do
+    perform_login(users(:kari))
+  end
+
   let(:existing_work) { works(:album) }
 
   describe "root" do
@@ -189,19 +193,61 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      skip
+      work = works(:album)
+
+      expect {
+        post upvote_path(work.id)
+      }.wont_change "Vote.count"
+
+      must_respond_with :redirect
+      must_redirect_to work_path(work.id)
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "Could not upvote"
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login
+
+      delete logout_path
+
+      work = works(:album)
+
+      expect {
+        post upvote_path(work.id)
+      }.wont_change "Vote.count"
+
+      must_respond_with :redirect
+      must_redirect_to root_path
+  
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      perform_login
+
+      work = works(:movie)
+
+      expect {
+        post upvote_path(work.id)
+      }.must_change "Vote.count", 1
+
+      must_respond_with :redirect
+      must_redirect_to work_path(work.id)
+      expect(flash[:status]).must_equal :success
+      expect(flash[:result_text]).must_equal "Successfully upvoted!"
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      perform_login 
+
+      work = works(:album) 
+
+      expect {
+        post upvote_path(work.id)
+      }.wont_change "Vote.count"
+
+      must_respond_with :redirect
+      must_redirect_to work_path(work.id)
+  
     end
   end
 end
