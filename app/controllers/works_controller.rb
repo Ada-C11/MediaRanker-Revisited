@@ -1,7 +1,8 @@
 class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
-  before_action :category_from_work, except: [:root, :index, :new, :create]
+  before_action :category_from_work, only: [:edit, :update, :destroy, :upvote]
+  before_action :find_logged_in_user, only: [:index, :show]
 
   def root
     @albums = Work.best_albums
@@ -11,7 +12,13 @@ class WorksController < ApplicationController
   end
 
   def index
-    @works_by_category = Work.to_category_hash
+    if @logged_in_user
+      @works_by_category = Work.to_category_hash
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must log in to do that"
+      redirect_to root_path
+    end
   end
 
   def new
@@ -34,7 +41,14 @@ class WorksController < ApplicationController
   end
 
   def show
-    @votes = @work.votes.order(created_at: :desc)
+    if @logged_in_user
+      category_from_work
+      @votes = @work.votes.order(created_at: :desc)
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must log in to do that"
+      redirect_to root_path
+    end
   end
 
   def edit
