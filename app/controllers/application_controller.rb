@@ -10,9 +10,15 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # hmmm saw this method on refactor, going to keep using the method I created... ¯\_(ツ)_/¯
+  # adding to wishlist to comeback and use this one instead.
   def find_user
     if session[:user_id]
       @login_user = User.find_by(id: session[:user_id])
     end
+  end
+
+  def find_logged_in_user
+    @logged_in_user = User.find_by(id: session[:user_id])
   end
 end

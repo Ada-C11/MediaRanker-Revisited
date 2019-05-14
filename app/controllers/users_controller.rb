@@ -1,11 +1,24 @@
 class UsersController < ApplicationController
+  before_action :find_logged_in_user, only: [:index, :show]
   def index
-    @users = User.all
+    if @logged_in_user
+      @users = User.all
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must log in to do that"
+      redirect_to root_path
+    end
   end
 
   def show
+    if @logged_in_user
     @user = User.find_by(id: params[:id])
     render_404 unless @user
+  else
+    flash[:status] = :failure
+    flash[:result_text] = "You must log in to do that"
+    redirect_to root_path
+  end
   end
 
   def create
