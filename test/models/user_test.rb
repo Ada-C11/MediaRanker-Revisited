@@ -23,20 +23,23 @@ describe User do
     it "requires a username" do
       user = User.new
       user.valid?.must_equal false
-      user.errors.messages.must_include :username
+      user.errors.messages.must_include :uid
+      user.errors.messages.must_include :provider
     end
 
-    it "requires a unique username" do
-      username = "test username"
-      user1 = User.new(username: username)
+    it "requires a unique user id and a provider" do
+      uid = 222333
+      provider = "github"
+      user1 = User.new(uid: uid, provider: provider)
 
       # This must go through, so we use create!
       user1.save!
 
-      user2 = User.new(username: username)
+      user2 = User.new(uid: nil, provider: nil)
       result = user2.save
       result.must_equal false
-      user2.errors.messages.must_include :username
+      user2.errors.messages.must_include :uid
+      user2.errors.messages.must_include :provider
     end
   end
 end
