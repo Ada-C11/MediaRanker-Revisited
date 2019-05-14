@@ -301,8 +301,8 @@ describe WorksController do
     it "redirects to the work page if the user has already voted for that work" do
       user = users(:sophie)
       work = works(:poodr)
-      vote = Vote.new(user: user, work: work)
       perform_login(user)
+      vote = Vote.new(user: user, work: work)
       post upvote_path(work.id)
       post upvote_path(work.id)
 
