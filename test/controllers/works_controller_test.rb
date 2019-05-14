@@ -121,11 +121,28 @@ describe WorksController do
   end
 
   describe "edit" do
-    it "succeeds for an extant work ID" do
-      perform_login
-      get edit_work_path(existing_work.id)
+    it "succeeds for an existant work ID" do
+      user = perform_login(users(:ada))
+      work = Work.new(title: "book for test", category: "book", creator: "tester", description: "Once upon a time there was a test that passed", publication_year: "2019", user_id: user.id)
+      work.save
+      get edit_work_path(work.id)
 
       must_respond_with :success
+    end
+
+    it "displays flash error if work does not belong to the user" do
+      user = perform_login(users(:ada))
+
+      work = Work.new(title: "book for test", category: "book", creator: "tester", description: "Once upon a time there was a test that passed", publication_year: "2019", user_id: user.id)
+      work.save
+
+      delete logout_path
+
+      perform_login(users(:grace))
+      get edit_work_path(work.id)
+
+      expect(flash[:error]).must_equal "You can only modify works you have created"
+      must_respond_with :redirect
     end
 
     it "renders 404 not_found for a bogus work ID" do
@@ -180,13 +197,34 @@ describe WorksController do
 
   describe "destroy" do
     it "succeeds for an extant work ID" do
-      perform_login
-      expect {
-        delete work_path(existing_work.id)
-      }.must_change "Work.count", -1
+      user = perform_login(users(:ada))
+
+      work = Work.new(title: "book for test", category: "book", creator: "tester", description: "Once upon a time there was a test that passed", publication_year: "2019", user_id: user.id)
+      work.save
+
+      expect { delete work_path(work.id) }.must_change "Work.count", -1
+
+      expect(flash[:status]).must_equal :success
+      expect(flash[:result_text]).must_equal "Successfully destroyed #{work.category} #{work.title}"
 
       must_respond_with :redirect
       must_redirect_to root_path
+    end
+
+    it "displays a flash error message when user doesn't own work to delete" do
+      user = perform_login(users(:ada))
+
+      work = Work.new(title: "book for test", category: "book", creator: "tester", description: "Once upon a time there was a test that passed", publication_year: "2019", user_id: user.id)
+      work.save
+
+      delete logout_path
+
+      perform_login(users(:grace))
+
+      expect {
+        delete work_path(existing_work.id)
+      }.wont_change "Work.count"
+      expect(flash[:error]).must_equal "You can only delete works you have created"
     end
 
     it "renders 404 not_found and does not update the DB for a bogus work ID" do
