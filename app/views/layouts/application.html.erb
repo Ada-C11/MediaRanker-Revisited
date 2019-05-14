@@ -34,9 +34,16 @@
       </ul>
       <ul class="nav app-header__user-nav-container">
         <% if session[:user_id] %>
-          <%= link_to "Log out", logout_path, method: "delete" %>
+          <li class="nav-item app-header__nav_item">
+            <%= link_to "Logged in as #{@login_user.username}", user_path(@login_user), class: "btn btn-primary" %>
+          </li>
+          <li class="nav-item app-header__nav_item">
+            <%= link_to "Log out", logout_path, method: "delete" %>
+          </li>
         <% else %>
-          <%= link_to "Login with Github", github_login_path %>
+          <li class="nav-item app-header__nav_item">
+            <%= link_to "Login with Github", github_login_path %>
+          </li>
         <% end %>
       </ul>
     </nav>
