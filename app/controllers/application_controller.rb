@@ -15,4 +15,16 @@ class ApplicationController < ActionController::Base
       @login_user = User.find_by(id: session[:user_id])
     end
   end
+
+  def not_logged_in
+    if session[:user_id].nil?
+      redirect_to root_path
+      flash[:status] = :failure
+      flash[:result_text] = "you have to be logged in to see this!"
+    end
+  end
+
+  # def user_creater
+  # if session[:user_id] != Work.find_by(id: params[:id]).user.id raise
+  # end
 end

@@ -6,6 +6,8 @@ describe WorksController do
 
   describe "root" do
     it "succeeds with all media types" do
+      #does this count as a test that when youre not logged in you can access homepage without errors?
+      # see :success
       get root_path
 
       must_respond_with :success
@@ -41,7 +43,7 @@ describe WorksController do
     #   must_respond_with :success
     # end
     describe "for logged in user" do
-      it "should get index when user is logged it" do
+      it "should get index when user is logged in" do
         perform_login
 
         get works_path
@@ -74,10 +76,22 @@ describe WorksController do
   end
 
   describe "new" do
-    it "succeeds" do
+    it "succeeds for logged in user" do
+      perform_login
+
       get new_work_path
 
       must_respond_with :success
+    end
+
+    it "doesnt succeed for logged out user" do
+      get new_work_path
+
+      must_respond_with :redirect
+      must_redirect_to root_path
+
+      expect(flash[:status]).must_equal :failure
+      expect(flash[:result_text]).must_equal "you have to be logged in to see this!"
     end
   end
 
@@ -246,9 +260,10 @@ describe WorksController do
         user.destroy
       end
 
-      get works_path
+      post upvote_path(existing_work)
 
       must_respond_with :redirect
+      must_redirect_to work_path(existing_work)
     end
 
     it "redirects to the work page after the user has logged out" do
@@ -256,13 +271,11 @@ describe WorksController do
 
       delete logout_path
 
+      post upvote_path(existing_work)
+
       must_respond_with :redirect
       expect(flash[:success]).must_equal "Successfully logged out!"
-      # binding.pry
-      # must_redirect_to work_path(existing_work)
-      # no fucking idea but         Expected response to be a redirect to <http://www.example.com/works/966291011> but was a redirect to <http://www.example.com/>.
-      # Expected "http://www.example.com/works/966291011" to be === "http://www.example.com/".
-      # test/controllers/works_controller_test.rb:224:in `block (3 levels) in <top (required)>'
+      must_redirect_to work_path(existing_work)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do

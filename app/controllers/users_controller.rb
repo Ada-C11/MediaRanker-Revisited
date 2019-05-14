@@ -1,13 +1,8 @@
 class UsersController < ApplicationController
+  before_action :not_logged_in, only: [:index]
+
   def index
-    if session[:user_id]
-      @users = User.all
-    else
-      redirect_to root_path
-      flash[:status] = :failure
-      flash[:result_text] = "you have to be logged in to see this!"
-    end
-    # I feel like there should be a way to do this without repeating it all the time, like, yup, applications controller?
+    @users = User.all
   end
 
   def show
