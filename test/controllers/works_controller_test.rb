@@ -34,20 +34,29 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
+    it "succeeds when there are works and user is logged in" do
+      user = users(:grace)
+      perform_login(user)
       get works_path
 
       must_respond_with :success
     end
 
-    it "succeeds when there are no works" do
+    it "succeeds when there are no works and user is logged in" do
       Work.all do |work|
         work.destroy
       end
 
+      user = users(:grace)
+      perform_login(user)
       get works_path
 
       must_respond_with :success
+    end
+
+    it "redirects to root with error when user is not logged in" do
+      get works_path
+      must_redirect_to root_path
     end
   end
 
@@ -96,7 +105,9 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
+    it "succeeds for an extant work ID when user is logged in" do
+      user = users(:grace)
+      perform_login(user)
       get work_path(existing_work.id)
 
       must_respond_with :success
@@ -105,10 +116,17 @@ describe WorksController do
     it "renders 404 not_found for a bogus work ID" do
       destroyed_id = existing_work.id
       existing_work.destroy
+      user = users(:grace)
+      perform_login(user)
 
       get work_path(destroyed_id)
 
       must_respond_with :not_found
+    end
+
+    it "redirects when no user is logged in" do
+      get work_path(Work.first)
+      must_redirect_to root_path
     end
   end
 
@@ -189,19 +207,26 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      skip
-    end
-
-    it "redirects to the work page after the user has logged out" do
-      skip
+      post upvote_path(Work.first.id)
+      must_redirect_to work_path(Work.first.id)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      user = users(:grace)
+      perform_login(user)
+
+      post upvote_path(works(:album))
+      expect(flash[:status]).must_equal :success
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      user = users(:grace)
+      work = works(:another_album)
+      perform_login(user)
+
+      post upvote_path(work)
+      expect(flash[:status]).must_equal :failure
+      must_redirect_to work_path(work)
     end
   end
 end
