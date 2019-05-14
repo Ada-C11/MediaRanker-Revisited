@@ -66,7 +66,7 @@ class WorksController < ApplicationController
     if Work.owned_by_user?(@work, @login_user)
       @work.destroy
       flash[:status] = :success
-      flash[:result_text] = "Successfully destroyed #{@media_category.singularize} #{@work.id}"
+      flash[:result_text] = "Successfully destroyed #{@work.category} #{@work.title}"
       redirect_to root_path
     else
       flash[:error] = "You can only delete works you have created"
