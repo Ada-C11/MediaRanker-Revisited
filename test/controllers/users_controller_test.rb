@@ -3,29 +3,22 @@ require "test_helper"
 describe UsersController do
   describe "login" do
     it "can log in an existing user" do
-      # Arrange
       user_count = User.count
 
-      # Act
       user = perform_login
 
       expect(user_count).must_equal User.count
 
-      # Should also test Flash notices
       expect(session[:user_id]).must_equal user.id
     end
 
     it "can log in a new user" do
-      # Arrange
       user = User.new(provider: "github", username: "billy", uid: 987, email: "joe@bob.com")
 
       expect {
-        # Act
         perform_login(user)
-        # Assert
       }.must_change "User.count", 1
 
-      # Should also test Flash notices
       user = User.find_by(uid: user.uid, provider: user.provider)
 
       expect(session[:user_id]).must_equal user.id
