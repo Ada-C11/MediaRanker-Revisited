@@ -46,4 +46,14 @@ class ActiveSupport::TestCase
 
     return user
   end
+
+  def check_flash(expected_status = :success)
+    if flash[:status]
+      expect(flash[:status].to_sym).must_equal(expected_status)
+      expect(flash[:result_text]).wont_be_nil
+    else
+      expect(flash.keys).must_include(expected_status.to_s)
+      expect(flash[expected_status]).wont_be_nil
+    end
+  end
 end
