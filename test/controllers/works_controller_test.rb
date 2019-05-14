@@ -33,6 +33,73 @@ describe WorksController do
   CATEGORIES = %w(albums books movies)
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
+
+
+  describe "Logged in users" do
+    before do
+      perform_login(users(:grace))
+    end
+
+
+    describe "upvote" do
+  
+      it "redirects to the work page after the user has logged out" do
+        user = users(:ada)
+        perform_login(user)
+        
+        delete logout_path
+  
+        expect {
+          post upvote_path(works(:poodr).id)
+        }.wont_change "Vote.count"
+  
+        must_redirect_to root_path
+      end
+  
+      it "succeeds for a logged-in user and a fresh user-vote pair" do
+        user = users(:ada)
+        perform_login(user)
+  
+        expect {
+          post upvote_path(works(:poodr).id)
+        }.must_change "Vote.count", +1
+  
+        must_redirect_to work_path
+      end
+  
+      it "redirects to the work page if the user has already voted for that work" do
+        user = users(:ada)
+        perform_login(user)
+        post upvote_path(works(:poodr).id)
+        expect {
+          post upvote_path(works(:poodr).id)
+        }.wont_change "Vote.count"
+  
+        must_redirect_to work_path
+        
+      end
+  
+    end
+
+
+
+    describe "show" do
+    
+      it "succeeds for a work that exists" do
+        work_id = works(:poodr).id
+        get work_path(work_id)
+        must_respond_with :success
+      end
+
+      it "returns 404 not_found for a book that D.N.E." do
+        work_id = Work.last.id + 1
+        get work_path(work_id)
+        must_respond_with :not_found
+      end
+    end
+
+
+
   describe "index" do
     it "succeeds when there are works" do
       get works_path
@@ -46,14 +113,6 @@ describe WorksController do
       end
 
       get works_path
-
-      must_respond_with :success
-    end
-  end
-
-  describe "new" do
-    it "succeeds" do
-      get new_work_path
 
       must_respond_with :success
     end
@@ -94,6 +153,17 @@ describe WorksController do
       end
     end
   end
+
+
+  describe "new" do
+    it "succeeds" do
+      get new_work_path
+
+      must_respond_with :success
+    end
+  end
+
+
 
   describe "show" do
     it "succeeds for an extant work ID" do
@@ -187,73 +257,30 @@ describe WorksController do
     end
   end
 
-  describe "upvote" do
-    it "redirects to the work page if no user is logged in" do
-      
-      expect {
-        post upvote_path(works(:poodr).id)
-      }.wont_change "Vote.count"
-
-      must_redirect_to work_path
-    end
-
-    it "redirects to the work page after the user has logged out" do
-      user = users(:ada)
-      perform_login(user)
-      
-      delete logout_path
-
-      expect {
-        post upvote_path(works(:poodr).id)
-      }.wont_change "Vote.count"
-
-      must_redirect_to work_path
-    end
-
-    it "succeeds for a logged-in user and a fresh user-vote pair" do
-      user = users(:ada)
-      perform_login(user)
-
-      expect {
-        post upvote_path(works(:poodr).id)
-      }.must_change "Vote.count", +1
-
-      must_redirect_to work_path
-    end
-
-    it "redirects to the work page if the user has already voted for that work" do
-      user = users(:ada)
-      perform_login(user)
-      post upvote_path(works(:poodr).id)
-      expect {
-        post upvote_path(works(:poodr).id)
-      }.wont_change "Vote.count"
-
-      must_redirect_to work_path
-      
-    end
 
   end
 
-  describe "Logged in users" do
-    before do
-      perform_login(users(:grace))
+  describe "Guest users" do
+    it "can access main page" do
+      get root_path
+      must_respond_with :success
     end
 
-    describe "show" do
-      # Just the standard show tests
-      it "succeeds for a work that exists" do
-        work_id = Work.first.id
-        get book_path(book_id)
-        must_respond_with :success
-      end
-
-      it "returns 404 not_found for a book that D.N.E." do
-        book_id = Book.last.id + 1
-        get book_path(book_id)
-        must_respond_with :not_found
-      end
+    it "cannot access show all work" do
+      get works_path
+      must_redirect_to root_path
+      # flash[:message].must_equal "You must be logged in to see that page"
     end
+
+    it "redirects to the work page if no user is logged in" do
+        
+      expect {
+        post upvote_path(works(:poodr).id)
+      }.wont_change "Vote.count"
+
+      must_redirect_to root_path
+    end
+
   end
 
 

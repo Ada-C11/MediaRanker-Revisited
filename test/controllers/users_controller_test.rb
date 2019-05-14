@@ -35,30 +35,10 @@ describe UsersController do
       end
     end
 
-  describe "destroy" do
-  
-    it "removes the user from the database" do
-      skip
-      user_params = {
-      provider: "github",
-      uid: 6666666,
-      email: "ada@adadevelopersacademy.org",
-      username: "randomname",
-      name: "niv"
-
-      }
-
-      doomed_user = User.create!(user_params)
-
-      expect {
-        delete user_path(doomed_user.id)
-      }.must_change "User.count", -1
-    end
-
-  end
 
   describe "index" do
     it "can get index" do
+      perform_login(users(:grace))
       get users_path
       must_respond_with :success
     end
@@ -66,11 +46,13 @@ describe UsersController do
 
   describe "show" do
     it "shows a user that exists" do
+      perform_login(users(:grace))
       get user_path(users(:ada).id)
       must_respond_with :ok
     end
 
-    it "returns a 404 status code if the work doesn't exist" do
+    it "returns a 404 status code if a user that doesn't exist" do
+      perform_login(users(:grace))
       get user_path(-1)
       must_respond_with :not_found
     end
