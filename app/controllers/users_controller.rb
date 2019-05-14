@@ -10,7 +10,7 @@ class UsersController < ApplicationController
 
   def create
     auth_hash = request.env["omniauth.auth"]
-    user = User.find_by(uid: auth_hash[:uid], provider: "github")
+    user = User.find_by(uid: auth_hash[:uid], provider: auth_hash[:provider])
 
     if user
       flash[:status] = :success
@@ -30,7 +30,8 @@ class UsersController < ApplicationController
     end
 
     session[:user_id] = user.id
-    return redirect_to root_path
+    redirect_to root_path
+    return
   end
 
   def destroy

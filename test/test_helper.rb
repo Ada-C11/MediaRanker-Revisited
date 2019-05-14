@@ -42,6 +42,7 @@ class ActiveSupport::TestCase
     user ||= User.first
     OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
     get github_callback_path(:github)
+    user.save
     return user
   end
 end
