@@ -2,8 +2,6 @@ require "test_helper"
 
 describe UsersController do
   describe "login" do
-    # I am going to reserve testing the different behaviors (between existing user or new user) for this set of tests, rather than in current
-
     it "can log in an existing user" do
       # Arrange
       user_count = User.count
@@ -14,7 +12,6 @@ describe UsersController do
       expect(user_count).must_equal User.count
 
       # Should also test Flash notices
-
       expect(session[:user_id]).must_equal user.id
     end
 
