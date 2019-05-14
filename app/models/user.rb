@@ -4,6 +4,7 @@ class User < ApplicationRecord
 
   validates :uid, uniqueness: true, presence: true
   validates :provider, presence: true
+  validates :username, uniqueness: true
 
   def self.build_from_github(auth_hash)
     user = User.new
