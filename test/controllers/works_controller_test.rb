@@ -232,5 +232,29 @@ describe WorksController do
       must_redirect_to work_path
       
     end
+
   end
+
+  describe "Logged in users" do
+    before do
+      perform_login(users(:grace))
+    end
+
+    describe "show" do
+      # Just the standard show tests
+      it "succeeds for a work that exists" do
+        work_id = Work.first.id
+        get book_path(book_id)
+        must_respond_with :success
+      end
+
+      it "returns 404 not_found for a book that D.N.E." do
+        book_id = Book.last.id + 1
+        get book_path(book_id)
+        must_respond_with :not_found
+      end
+    end
+  end
+
+
 end
