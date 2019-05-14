@@ -35,12 +35,23 @@ describe WorksController do
 
   describe "index" do
     it "succeeds when there are works" do
+      perform_login
+
       get works_path
 
       must_respond_with :success
     end
 
+    it "redirects when there are works and user is not logged in" do
+      get works_path
+
+      must_respond_with :redirect
+      must_redirect_to root_path
+    end
+
     it "succeeds when there are no works" do
+      perform_login
+
       Work.all do |work|
         work.destroy
       end
@@ -48,6 +59,17 @@ describe WorksController do
       get works_path
 
       must_respond_with :success
+    end
+
+    it "redirects when there are no works and user is not logged in" do
+      Work.all do |work|
+        work.destroy
+      end
+
+      get works_path
+
+      must_respond_with :redirect
+      must_redirect_to root_path
     end
   end
 
@@ -97,9 +119,18 @@ describe WorksController do
 
   describe "show" do
     it "succeeds for an extant work ID" do
+      perform_login
+
       get work_path(existing_work.id)
 
       must_respond_with :success
+    end
+
+    it "redirects to root when user is not logged in" do
+      get work_path(existing_work.id)
+
+      must_respond_with :redirect
+      must_redirect_to root_path
     end
 
     it "renders 404 not_found for a bogus work ID" do

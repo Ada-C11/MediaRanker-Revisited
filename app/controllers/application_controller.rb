@@ -13,9 +13,6 @@ class ApplicationController < ActionController::Base
   def find_user
     if session[:user_id]
       @login_user = User.find_by(id: session[:user_id])
-      puts "This is the username #{@login_user.username}"
-    else
-      puts "This is the else"
     end
   end
 
