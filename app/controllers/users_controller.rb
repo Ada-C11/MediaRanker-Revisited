@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  before_action :require_login, only: [:index, :show]
+
   def index
     @users = User.all
   end
@@ -31,7 +33,8 @@ class UsersController < ApplicationController
 
   def destroy
     session[:user_id] = nil
-    flash[:success] = "Successfully logged out!"
+    flash[:status] = :success
+    flash[:result_text] = "Successfully logged out!"
 
     redirect_to root_path
   end

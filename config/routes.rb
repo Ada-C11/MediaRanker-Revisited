@@ -11,5 +11,6 @@ Rails.application.routes.draw do
   resources :users, only: [:index, :show]
   get "/auth/github", as: "github_login"
   get "/auth/:provider/callback", to: "users#create", as: "auth_callback"
-  get "/logout", to: "users#destroy", as: "logout"
+  delete "/logout", to: "users#destroy", as: "logout"
+  # get "/logout", to: "users#destroy", as: "logout"
 end

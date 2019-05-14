@@ -1,8 +1,40 @@
 require "test_helper"
 
 describe UsersController do
+  describe "index" do
+    it "requires the user to log in" do
+      get users_path
+      expect(flash[:status]).must_equal :error
+      expect(flash[:result_text]).must_equal "You must be logged in to perform this action."
+      must_respond_with :redirect
+      must_redirect_to root_path
+    end
+    it "can get index page" do
+      perform_login
+      get users_path
+      must_respond_with :success
+    end
+  end
+
+  describe "show" do
+    it "requires the user to log in" do
+      user = users(:sophie)
+      get user_path(user.id)
+      expect(flash[:status]).must_equal :error
+      expect(flash[:result_text]).must_equal "You must be logged in to perform this action."
+      must_respond_with :redirect
+      must_redirect_to root_path
+    end
+
+    it "can get the show page" do
+      user = users(:sophie)
+      perform_login(user)
+      get user_path(user.id)
+      must_respond_with :success
+    end
+  end
   describe "create" do
-    it "logs in an existing user and redirects to the root routes" do
+    it "logs in an existing user and redirects to the root route" do
       start_count = User.count
       user = users(:sophie)
       perform_login(user)
@@ -42,10 +74,12 @@ describe UsersController do
 
   describe "destroy" do
     it "logs a user out" do
-      user = users(:sophie)
-
-      perform_login(user)
-      get logout_path(user)
+      perform_login
+      expect {
+        delete logout_path
+      }.wont_change "User.count"
+      expect(session[:user_id]).must_be_nil
+      expect(flash[:result_text]).must_equal "Successfully logged out!"
       must_respond_with :redirect
       must_redirect_to root_path
     end
