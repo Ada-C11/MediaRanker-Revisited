@@ -106,6 +106,4 @@ class WorksController < ApplicationController
     render_404 unless @work
     @media_category = @work.category.downcase.pluralize
   end
-
-
 end

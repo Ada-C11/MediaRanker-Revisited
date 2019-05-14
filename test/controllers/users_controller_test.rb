@@ -2,6 +2,58 @@ require "test_helper"
 
 describe UsersController do
   let(:user) { users(:dan) }
+  describe "index" do
+    describe "as a logged in user" do
+      before do
+        perform_login
+      end
+
+      it "succeeds" do
+        get users_path
+        must_respond_with :success
+      end
+    end
+
+    describe "as a user that is not logged in " do
+      it "redirects to homepage with flash error" do
+        get works_path
+
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must log in to do that"
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
+    end
+  end
+
+  describe "show" do
+    describe "as a logged in user" do
+      before do
+        perform_login
+      end
+      it "will succeed if given extant user ID" do
+        get user_path(User.last.id)
+        must_respond_with :success
+      end
+      it "renders 404 not_found for an invalid user ID" do
+        get user_path(-1)
+        must_respond_with :not_found
+      end
+    end
+
+    describe "as a user that is not logged in " do
+      it "redirects to homepage with flash error" do
+        get works_path
+
+        expect(flash[:status]).must_equal :failure
+        expect(flash[:result_text]).must_equal "You must log in to do that"
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
+    end
+  end
   describe "create (login)" do
     it "logs in an existing user and redirects to the root route" do
       expect { perform_login }.wont_change "User.count"
