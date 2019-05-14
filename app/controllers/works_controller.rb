@@ -1,7 +1,7 @@
 class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
-  before_action :category_from_work, except: [:root, :index, :new, :create]
+  before_action :category_from_work, only: [:edit, :update, :destroy, :upvote]
   before_action :find_logged_in_user, only: [:index, :show]
 
   def root
@@ -42,12 +42,13 @@ class WorksController < ApplicationController
 
   def show
     if @logged_in_user
-    @votes = @work.votes.order(created_at: :desc)
-  else
-    flash[:status] = :failure
-    flash[:result_text] = "You must log in to do that"
-    redirect_to root_path
-  end
+      category_from_work
+      @votes = @work.votes.order(created_at: :desc)
+    else
+      flash[:status] = :failure
+      flash[:result_text] = "You must log in to do that"
+      redirect_to root_path
+    end
   end
 
   def edit
