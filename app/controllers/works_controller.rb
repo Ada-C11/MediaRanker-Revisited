@@ -43,8 +43,6 @@ class WorksController < ApplicationController
 
   def edit
     if !Work.owned_by_user?(@work, @login_user)
-      # if @work.user_id != session[:user_id]
-      # raise
       flash[:error] = "You can only modify works you have created"
       redirect_to work_path(@work.id)
     end
