@@ -29,7 +29,7 @@ describe WorksController do
   end
   describe "logged in users" do
     before do
-      perform_login
+      perform_login(users(:dan))
     end
     describe "root" do
       it "succeeds with all media types" do
@@ -140,78 +140,119 @@ describe WorksController do
       end
     end
 
-    describe "edit" do
-      it "succeeds for an extant work ID" do
-        get edit_work_path(existing_work.id)
+    describe "authorized user" do
+      describe "edit" do
+        it "succeeds for an extant work ID" do
+          get edit_work_path(existing_work.id)
 
-        must_respond_with :success
+          must_respond_with :success
+        end
+
+        it "renders 404 not_found for a bogus work ID" do
+          bogus_id = existing_work.id
+          existing_work.destroy
+
+          get edit_work_path(bogus_id)
+
+          must_respond_with :not_found
+        end
       end
 
-      it "renders 404 not_found for a bogus work ID" do
-        bogus_id = existing_work.id
-        existing_work.destroy
+      describe "update" do
+        it "succeeds for valid data and an extant work ID" do
+          updates = { work: { title: "Dirty Computer" } }
 
-        get edit_work_path(bogus_id)
+          expect {
+            put work_path(existing_work), params: updates
+          }.wont_change "Work.count"
+          updated_work = Work.find_by(id: existing_work.id)
 
-        must_respond_with :not_found
+          updated_work.title.must_equal "Dirty Computer"
+          must_respond_with :redirect
+          must_redirect_to work_path(existing_work.id)
+        end
+
+        it "renders bad_request for bogus data" do
+          updates = { work: { title: nil } }
+
+          expect {
+            put work_path(existing_work), params: updates
+          }.wont_change "Work.count"
+
+          work = Work.find_by(id: existing_work.id)
+
+          must_respond_with :not_found
+        end
+
+        it "renders 404 not_found for a bogus work ID" do
+          bogus_id = existing_work.id
+          existing_work.destroy
+
+          put work_path(bogus_id), params: { work: { title: "Test Title" } }
+
+          must_respond_with :not_found
+        end
+      end
+
+      describe "destroy" do
+        it "succeeds for an extant work ID" do
+          expect {
+            delete work_path(existing_work.id)
+          }.must_change "Work.count", -1
+
+          must_respond_with :redirect
+          must_redirect_to root_path
+        end
+
+        it "renders 404 not_found and does not update the DB for a bogus work ID" do
+          bogus_id = existing_work.id
+          existing_work.destroy
+
+          expect {
+            delete work_path(bogus_id)
+          }.wont_change "Work.count"
+
+          must_respond_with :not_found
+        end
       end
     end
 
-    describe "update" do
-      it "succeeds for valid data and an extant work ID" do
-        updates = { work: { title: "Dirty Computer" } }
+    describe "unauthorized user" do
+      let(:other_work) { works(:another_album) }
+      describe "edit" do
+        it "succeeds for an extant work ID" do
+          get edit_work_path(other_work.id)
 
-        expect {
-          put work_path(existing_work), params: updates
-        }.wont_change "Work.count"
-        updated_work = Work.find_by(id: existing_work.id)
+          expect(flash[:status]).must_equal :failure
 
-        updated_work.title.must_equal "Dirty Computer"
-        must_respond_with :redirect
-        must_redirect_to work_path(existing_work.id)
+          must_respond_with :redirect
+        end
       end
 
-      it "renders bad_request for bogus data" do
-        updates = { work: { title: nil } }
+      describe "update" do
+        it "redirects and flashes an error if the user is not associated with the work" do
+          updates = { work: { title: "Dirty Computer" } }
 
-        expect {
-          put work_path(existing_work), params: updates
-        }.wont_change "Work.count"
+          expect {
+            put work_path(other_work), params: updates
+          }.wont_change "Work.count"
 
-        work = Work.find_by(id: existing_work.id)
+          expect(flash[:status]).must_equal :failure
 
-        must_respond_with :not_found
+          must_respond_with :redirect
+        end
       end
 
-      it "renders 404 not_found for a bogus work ID" do
-        bogus_id = existing_work.id
-        existing_work.destroy
+      describe "destroy" do
+        it "will not let a user delete a work if they are not associated with it" do
+          expect {
+            delete work_path(other_work.id)
+          }.wont_change "Work.count"
 
-        put work_path(bogus_id), params: { work: { title: "Test Title" } }
+          expect(flash[:status]).must_equal :failure
 
-        must_respond_with :not_found
-      end
-    end
-
-    describe "destroy" do
-      it "succeeds for an extant work ID" do
-        expect {
-          delete work_path(existing_work.id)
-        }.must_change "Work.count", -1
-
-        must_respond_with :redirect
-        must_redirect_to root_path
-      end
-
-      it "renders 404 not_found and does not update the DB for a bogus work ID" do
-        bogus_id = existing_work.id
-        existing_work.destroy
-
-        expect {
-          delete work_path(bogus_id)
-        }.wont_change "Work.count"
-
-        must_respond_with :not_found
+          must_respond_with :redirect
+        end
       end
     end
   end
