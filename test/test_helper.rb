@@ -47,7 +47,6 @@ def perform_login(user = nil)
     OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash)
 
     get auth_callback_path("github")
-
     puts "totally logged in"
     return user
   end

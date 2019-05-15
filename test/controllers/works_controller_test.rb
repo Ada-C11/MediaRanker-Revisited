@@ -2,6 +2,9 @@ require "test_helper"
 
 describe WorksController do
   let(:existing_work) { works(:album) }
+  before do
+    get works_path
+  end
 
   describe "root" do
     it "succeeds with all media types" do
@@ -83,6 +86,7 @@ describe WorksController do
 
     describe "create" do
       it "creates a work with valid data for a real category" do
+        perform_login
         new_work = { work: { title: "Dirty Computer", category: "album" } }
 
         expect {
@@ -96,6 +100,7 @@ describe WorksController do
       end
 
       it "renders bad_request and does not update the DB for bogus data" do
+        # perform_login
         bad_work = { work: { title: nil, category: "book" } }
 
         expect {
@@ -118,7 +123,8 @@ describe WorksController do
     end
 
     describe "edit" do
-      it "succeeds for an extant work ID" do
+      it "succeeds for an existing work ID" do
+        perform_login
         get edit_work_path(existing_work.id)
 
         must_respond_with :success
@@ -136,6 +142,7 @@ describe WorksController do
 
     describe "update" do
       it "succeeds for valid data and an extant work ID" do
+        perform_login
         updates = { work: { title: "Dirty Computer" } }
 
         expect {
@@ -149,6 +156,7 @@ describe WorksController do
       end
 
       it "renders bad_request for bogus data" do
+        perform_login
         updates = { work: { title: nil } }
 
         expect {
@@ -171,7 +179,8 @@ describe WorksController do
     end
 
     describe "destroy" do
-      it "succeeds for an extant work ID" do
+      it "succeeds for an existing work ID" do
+        perform_login
         expect {
           delete work_path(existing_work.id)
         }.must_change "Work.count", -1
@@ -271,7 +280,7 @@ describe WorksController do
     it "requires a login for upvote" do
       # "redirects to the work page if no user is logged in" do
       post upvote_path(existing_work.id) 
-      must_redirect_to root_path
+      must_redirect_to work_path(existing_work)
     end
   end
 end
