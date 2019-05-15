@@ -57,7 +57,7 @@ describe WorksController do
 
         check_flash(expected_status = :failure)
 
-        must_respond_with :ok #redirect
+        must_respond_with :redirect
         must_redirect_to root_path
       end
     end
