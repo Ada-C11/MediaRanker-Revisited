@@ -5,7 +5,7 @@ describe WorksController do
 
   describe "root" do
     it "succeeds with all media types" do
-      get root_path
+      get root1_path
 
       must_respond_with :success
     end
