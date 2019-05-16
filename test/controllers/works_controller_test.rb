@@ -33,24 +33,6 @@ describe WorksController do
   CATEGORIES = %w(albums books movies)
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
-  describe "index" do
-    it "succeeds when there are works" do
-      get works_path
-
-      must_respond_with :success
-    end
-
-    it "succeeds when there are no works" do
-      Work.all do |work|
-        work.destroy
-      end
-
-      get works_path
-
-      must_respond_with :success
-    end
-  end
-
   describe "new" do
     it "succeeds" do
       get new_work_path
@@ -92,23 +74,6 @@ describe WorksController do
         Work.find_by(title: "Invalid Work", category: category).must_be_nil
         must_respond_with :bad_request
       end
-    end
-  end
-
-  describe "show" do
-    it "succeeds for an extant work ID" do
-      get work_path(existing_work.id)
-
-      must_respond_with :success
-    end
-
-    it "renders 404 not_found for a bogus work ID" do
-      destroyed_id = existing_work.id
-      existing_work.destroy
-
-      get work_path(destroyed_id)
-
-      must_respond_with :not_found
     end
   end
 
@@ -189,19 +154,89 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      skip
+      
+      expect {
+        post upvote_path(Work.first)
+      }.wont_change "Vote.count"
+
+      must_redirect_to work_path(Work.first.id)
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      perform_login
+
+      delete logout_path
+      expect {
+        post upvote_path(Work.first)
+      }.wont_change "Vote.count"
+
+      must_redirect_to work_path(Work.first)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      perform_login
+    
+      expect {
+        post upvote_path(Work.first)
+      }.must_change "Vote.count", +1
+
+      must_redirect_to work_path(Work.first)
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      
     end
   end
+
+  describe "Logged in users" do
+    before do
+      perform_login
+    end
+    describe "index" do
+      it "succeeds when there are works" do
+        get works_path
+    
+        must_respond_with :success
+      end
+    
+      it "succeeds when there are no works" do
+        Work.all do |work|
+          work.destroy
+        end
+    
+        get works_path
+    
+        must_respond_with :success
+      end
+    end
+
+    describe "show" do
+      it "succeeds for an extant work ID" do
+        get work_path(Work.first)
+  
+        must_respond_with :success
+      end
+  
+      it "renders 404 not_found for a bogus work ID" do
+        work_id = 999
+  
+        get work_path(work_id)
+  
+        must_respond_with :not_found
+      end
+    end
+  end
+
+  describe "guest users" do
+    it "requires login for index" do
+      get works_path
+      must_redirect_to github_login_path
+    end
+
+    it "requires login for show" do
+      get work_path(existing_work)
+      must_redirect_to github_login_path
+    end
+  end
+  
 end

@@ -6,3 +6,5 @@ CSV.foreach(media_file, headers: true, header_converters: :symbol, converters: :
   puts data
   Work.create!(data)
 end
+
+
