@@ -30,45 +30,6 @@ describe WorksController do
     end
   end
 
-  describe "guest" do
-    describe "index" do
-      it "restricts access and redirects to root page" do
-        get works_path
-
-        must_respond_with :redirect
-        must_redirect_to root_path
-      end
-    end
-  end
-
-  describe "logged in user" do
-  end 
-
-  CATEGORIES = %w(albums books movies)
-  INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
-
-  describe "index" do
-    it "succeeds when there are works" do
-      perform_login
-
-      get works_path
-
-      must_respond_with :success
-    end
-
-    it "succeeds when there are no works" do
-      perform_login
-      
-      Work.all do |work|
-        work.destroy
-      end
-
-      get works_path
-
-      must_respond_with :success
-    end
-  end
-
   describe "new" do
     it "succeeds" do
       get new_work_path
@@ -110,23 +71,6 @@ describe WorksController do
         Work.find_by(title: "Invalid Work", category: category).must_be_nil
         must_respond_with :bad_request
       end
-    end
-  end
-
-  describe "show" do
-    it "succeeds for an extant work ID" do
-      get work_path(existing_work.id)
-
-      must_respond_with :success
-    end
-
-    it "renders 404 not_found for a bogus work ID" do
-      destroyed_id = existing_work.id
-      existing_work.destroy
-
-      get work_path(destroyed_id)
-
-      must_respond_with :not_found
     end
   end
 
@@ -205,59 +149,125 @@ describe WorksController do
     end
   end
 
-  describe "upvote" do
-    before do
-      @work = Work.first
+  describe "guest" do
+    describe "index" do
+      it "restricts access and redirects to root page" do
+        get works_path
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
     end
 
-    it "redirects to the work page if no user is logged in" do
-      expect {
-        post upvote_path(@work)
-      }.wont_change "Vote.count"
-
-      must_respond_with :redirect
-      must_redirect_to work_path(@work)
+    describe "show" do
+      it "restricts access and redirects to root page" do
+        get work_path(existing_work.id)
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
     end
 
-    it "succeeds for a logged-in user and a fresh user-vote pair" do
-      user = perform_login
+    describe "upvote" do
+      it "redirects to the work page if no user is logged in" do
+        expect {
+          post upvote_path(existing_work.id)
+        }.wont_change "Vote.count"
 
-      expect {
-        post upvote_path(@work)
-      }.must_change "Vote.count", +1
+        must_respond_with :redirect
+        must_redirect_to work_path(existing_work.id)
+      end
+    end
+  end
 
-      vote = Vote.last
+  describe "logged in user" do
+    CATEGORIES = %w(albums books movies)
+    INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
-      expect(vote.user_id).must_equal user.id
-      expect(vote.work_id).must_equal @work.id
+    describe "index" do
+      it "succeeds when there are works" do
+        perform_login
+
+        get works_path
+
+        must_respond_with :success
+      end
+
+      it "succeeds when there are no works" do
+        perform_login
+
+        Work.all do |work|
+          work.destroy
+        end
+
+        get works_path
+
+        must_respond_with :success
+      end
     end
 
-    it "redirects to the work page if the user has already voted for that work" do
-      user = perform_login
+    describe "show" do
+      it "succeeds for an extant work ID" do
+        perform_login
 
-      expect {
-        post upvote_path(@work)
-      }.must_change "Vote.count", +1
+        get work_path(existing_work.id)
 
-      expect {
-        post upvote_path(@work)
-      }.wont_change "Vote.count"
+        must_respond_with :success
+      end
 
-      must_respond_with :redirect
-      must_redirect_to work_path(@work)
+      it "renders 404 not_found for a bogus work ID" do
+        perform_login
+
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      perform_login
-      bogus_id = existing_work.id
-      existing_work.destroy
+    describe "upvote" do
+      before do
+        @work = Work.first
+      end
 
-      post upvote_path(bogus_id)
+      it "succeeds for a logged-in user and a fresh user-vote pair" do
+        user = perform_login
 
-      must_respond_with :not_found
+        expect {
+          post upvote_path(@work)
+        }.must_change "Vote.count", +1
+
+        vote = Vote.last
+
+        expect(vote.user_id).must_equal user.id
+        expect(vote.work_id).must_equal @work.id
+      end
+
+      it "redirects to the work page if the user has already voted for that work" do
+        user = perform_login
+
+        expect {
+          post upvote_path(@work)
+        }.must_change "Vote.count", +1
+
+        expect {
+          post upvote_path(@work)
+        }.wont_change "Vote.count"
+
+        must_respond_with :redirect
+        must_redirect_to work_path(@work)
+      end
+
+      it "renders 404 not_found for a bogus work ID" do
+        perform_login
+        bogus_id = existing_work.id
+        existing_work.destroy
+
+        post upvote_path(bogus_id)
+
+        must_respond_with :not_found
+      end
     end
   end
 end
-
-# movie = Movie.new(title: "Jack", overview: "Captain Barbaosa". ...)
-# binding.pry
