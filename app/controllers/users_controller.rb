@@ -1,5 +1,3 @@
-require 'pry'
-
 class UsersController < ApplicationController
   def index
     @users = User.all
@@ -10,8 +8,6 @@ class UsersController < ApplicationController
     render_404 unless @user
   end
 
-  def login_form
-  end
 
   def create
     # binding.pry

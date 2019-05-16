@@ -3,21 +3,6 @@ class WorksController < ApplicationController
   # of work we're dealing with
   before_action :category_from_work, except: [:root, :index, :new, :create]
 
-
-
-#   As a guest user, I want to be able to...
-
-# access the main page without an error message
-# access the index page should be redirected to the main page with an error message
-# access the show page for any work should be redirected to the main page with an error message
-# ... so that I can see parts of the website, but know that I must log-in for full functionality
-
-# As a logged-in user, I want to be able to...
-
-# access the show page for any work of any category
-# access the show page for any index page
-# ... so that I can use full site functionality as a site member
-
   def root
     @albums = Work.best_albums
     @books = Work.best_books
