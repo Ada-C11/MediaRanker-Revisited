@@ -30,17 +30,35 @@ describe WorksController do
     end
   end
 
+  describe "guest" do
+    describe "index" do
+      it "restricts access and redirects to root page" do
+        get works_path
+
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
+    end
+  end
+
+  describe "logged in user" do
+  end 
+
   CATEGORIES = %w(albums books movies)
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
     it "succeeds when there are works" do
+      perform_login
+
       get works_path
 
       must_respond_with :success
     end
 
     it "succeeds when there are no works" do
+      perform_login
+      
       Work.all do |work|
         work.destroy
       end
@@ -188,29 +206,26 @@ describe WorksController do
   end
 
   describe "upvote" do
-    before do 
-      @work = Work.first 
-    end 
+    before do
+      @work = Work.first
+    end
 
     it "redirects to the work page if no user is logged in" do
-
-      expect { 
+      expect {
         post upvote_path(@work)
       }.wont_change "Vote.count"
 
       must_respond_with :redirect
       must_redirect_to work_path(@work)
-
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-
       user = perform_login
 
-      expect { 
+      expect {
         post upvote_path(@work)
       }.must_change "Vote.count", +1
-      
+
       vote = Vote.last
 
       expect(vote.user_id).must_equal user.id
@@ -218,14 +233,13 @@ describe WorksController do
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-
       user = perform_login
 
-      expect { 
+      expect {
         post upvote_path(@work)
       }.must_change "Vote.count", +1
 
-      expect { 
+      expect {
         post upvote_path(@work)
       }.wont_change "Vote.count"
 
@@ -244,3 +258,6 @@ describe WorksController do
     end
   end
 end
+
+# movie = Movie.new(title: "Jack", overview: "Captain Barbaosa". ...)
+# binding.pry
