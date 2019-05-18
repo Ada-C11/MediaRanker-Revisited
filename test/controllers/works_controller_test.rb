@@ -53,7 +53,7 @@ describe WorksController do
       must_respond_with :success
     end
 
-    it "redirects if no user logged in" do
+    it "redirects if no user logged in" do 
       get works_path
 
       must_respond_with :redirect
@@ -69,7 +69,7 @@ describe WorksController do
       must_respond_with :success
     end
 
-    it "redirects if not logged in" do
+    it "redirects if not logged in" do 
       get new_work_path
 
       must_redirect_to root_path
@@ -229,15 +229,15 @@ describe WorksController do
       perform_login
       unvoted_work = works(:movie)
       post upvote_path(unvoted_work.id)
-
+  
       expect(flash[:status]).must_equal :success
     end
 
     it "redirects to the work page if the user has already voted for that work" do
       user = perform_login
-
+      
       post upvote_path(existing_work.id)
-
+  
       expect(flash[:status]).must_equal :failure
       must_redirect_to work_path(existing_work.id)
     end

@@ -1,14 +1,15 @@
 require "test_helper"
 
 describe UsersController do
-  describe "index" do
-    it "loads the users successfully" do
+  describe "index" do 
+
+    it "loads the users successfully" do 
       get users_path
 
       must_respond_with :ok
     end
 
-    it "will load the page even with 0 users" do
+    it "will load the page even with 0 users" do 
       User.destroy_all
 
       get users_path
@@ -17,8 +18,8 @@ describe UsersController do
     end
   end
 
-  describe "show" do
-    it "loads the user show page for existant user" do
+  describe "show" do 
+    it "loads the user show page for existant user" do 
       dan_user = users(:dan)
 
       get user_path(dan_user)
@@ -26,7 +27,7 @@ describe UsersController do
       must_respond_with :ok
     end
 
-    it "redirects for nonextant user" do
+    it "redirects for nonextant user" do 
       invalid_id = User.last.id + 1
 
       get user_path(invalid_id)
@@ -52,7 +53,7 @@ describe UsersController do
     it "creates an account for a new user and redirects to the root route" do
       start_count = User.count
       user = User.new(name: "Ted", username: "ted_rocks", email: "ted@gmail.com", uid: 1234563, provider: "github")
-
+      
       perform_login(user)
 
       must_redirect_to root_path
@@ -61,7 +62,7 @@ describe UsersController do
     end
 
     it "redirects to the login route if given invalid user data" do
-      start_count = User.count
+      start_count  = User.count
       user = User.new(name: "Carl", email: "carljr@carls.com")
 
       perform_login(user)
@@ -71,8 +72,8 @@ describe UsersController do
     end
   end
 
-  describe "destroy" do
-    it "will logout someone who is logged in" do
+  describe "destroy" do 
+    it "will logout someone who is logged in" do 
       perform_login
 
       expect {

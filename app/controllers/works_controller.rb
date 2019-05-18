@@ -1,7 +1,6 @@
 class WorksController < ApplicationController
   before_action :category_from_work, except: [:root, :index, :new, :create]
   before_action :find_user, except: [:index]
-
   def root
     @albums = Work.best_albums
     @books = Work.best_books
