@@ -1,7 +1,6 @@
 class WorksController < ApplicationController
-  # We should always be able to tell what category
-  # of work we're dealing with
   before_action :category_from_work, except: [:root, :index, :new, :create]
+  before_action :require_login, only: [:index, :show, :upvote]
 
   def root
     @albums = Work.best_albums
@@ -76,8 +75,6 @@ class WorksController < ApplicationController
       flash[:result_text] = "You must log in to do that"
     end
 
-    # Refresh the page to show either the updated vote count
-    # or the error message
     redirect_back fallback_location: work_path(@work)
   end
 
