@@ -238,6 +238,7 @@ describe WorksController do
 
       post upvote_path(work.id)
       expect(work.votes.count).must_equal work_votes + 1
+      expect(flash[:result_text]).must_equal "Successfully upvoted!"
       
       post upvote_path(work.id)
       expect(flash[:result_text]).must_equal "Could not upvote"
