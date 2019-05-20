@@ -37,7 +37,7 @@ describe WorksController do
     it "succeeds when there are works" do
       get works_path
 
-      must_respond_with :success
+      must_respond_with :found
     end
 
     it "succeeds when there are no works" do
@@ -47,7 +47,7 @@ describe WorksController do
 
       get works_path
 
-      must_respond_with :success
+      must_respond_with :found
     end
   end
 
@@ -99,7 +99,7 @@ describe WorksController do
     it "succeeds for an extant work ID" do
       get work_path(existing_work.id)
 
-      must_respond_with :success
+      must_respond_with :found
     end
 
     it "renders 404 not_found for a bogus work ID" do
@@ -188,20 +188,90 @@ describe WorksController do
   end
 
   describe "upvote" do
+    before do
+      @login_user = nil
+      @work = Work.first
+      @vote_data = {
+        vote: {
+          user: @login_user,
+          work: @work
+        }
+      }
+    end
     it "redirects to the work page if no user is logged in" do
-      skip
+      
+      expect {
+        post upvote_path(@work.id), params: @vote_data
+      }.wont_change "Vote.count"
+      
+      must_redirect_to work_path(@work.id)   
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      @login_user = perform_login
+      
+      delete logout_path
+      
+      expect(session[:user_id]).must_be_nil
+      must_redirect_to root_path
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      user = perform_login
+      work = Work.last
+      vote_data = {
+        vote: {
+          user: user,
+          work: work,
+        }
+      }
+      
+      expect { post upvote_path(work.id), params: vote_data
+      }.must_change "Vote.count", 1
+      
+      expect(flash[:status]).must_equal :success
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+    
+      post upvote_path(@work.id), params: @vote_data
+          
+      expect {
+        post upvote_path(@work.id), params: @vote_data
+      }.wont_change "Vote.count"
+      
+      must_redirect_to work_path(@work.id)
+      
+    end
+    
+    describe "Guest Users" do
+      before do
+        user = users(:grace)
+        delete logout_path
+      end
+      it "lets a guest user see the home page" do
+ 
+        get root_path
+        
+        must_respond_with :ok
+      end
+    
+      it "redirects to the root page when trying to see a list of works" do
+       
+        get works_path
+        
+        must_redirect_to root_path
+        expect(flash[:result_text]).must_equal "You must be logged in to view this section"
+      end
+      
+      it "redirects to the root page when trying to see a work details page" do
+        work = Work.first
+        
+        get work_path(work)
+        
+        must_redirect_to root_path
+        expect(flash[:result_text]).must_equal "You must be logged in to view this section"
+      end
     end
   end
 end
