@@ -5,9 +5,13 @@
   <p><%= @work.description %></p>
   <section>
     <%= link_to "Back to media ranks", root_path, class: "btn btn-primary" %>
-    <%= link_to "Edit", edit_work_path(@work), class: "btn btn-primary" %>
+    <% if correct_user?(@work) %>
+      <%= link_to "Edit", edit_work_path(@work), class: "btn btn-primary" %>
+    <% end %>
     <%= link_to "Upvote", upvote_path(@work), class: "btn btn-primary", method: :post %>
-    <%= link_to "Delete", work_path(@work), class: "btn btn-danger", method: "delete", data: { confirm: "Are you sure?" } %>
+    <% if correct_user?(@work) %>
+      <%= link_to "Delete", work_path(@work), class: "btn btn-danger", method: "delete", data: { confirm: "Are you sure?" } %>
+    <% end %>
   </section>
 </section>
 

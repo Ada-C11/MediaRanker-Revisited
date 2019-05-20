@@ -1,6 +1,8 @@
 class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
+  skip_before_action :require_login, except: [:index, :show, :new, :create, :edit, :update, :destroy, :upvote]
+
   before_action :category_from_work, except: [:root, :index, :new, :create]
 
   def root
@@ -21,6 +23,7 @@ class WorksController < ApplicationController
   def create
     @work = Work.new(media_params)
     @media_category = @work.category
+    @work.user_id = session[:user_id]
     if @work.save
       flash[:status] = :success
       flash[:result_text] = "Successfully created #{@media_category.singularize} #{@work.id}"
@@ -38,9 +41,21 @@ class WorksController < ApplicationController
   end
 
   def edit
+    # work_user = User.find_by(id: @work.user_id)
+    if @work.user_id != session[:user_id]
+      flash[:status] = :failure
+      flash[:result_text] = "You must be the owner of this work to edit it"
+      redirect_to root_path, status: :bad_request
+    end
   end
 
   def update
+    if @work.user_id != session[:user_id]
+      flash[:status] = :failure
+      flash[:result_text] = "You must be the owner of this work to edit it"
+      redirect_to root_path, status: :bad_request
+      return
+    end
     @work.update_attributes(media_params)
     if @work.save
       flash[:status] = :success
@@ -55,10 +70,16 @@ class WorksController < ApplicationController
   end
 
   def destroy
-    @work.destroy
-    flash[:status] = :success
-    flash[:result_text] = "Successfully destroyed #{@media_category.singularize} #{@work.id}"
-    redirect_to root_path
+    if @work.user_id != session[:user_id]
+      flash[:status] = :failure
+      flash[:result_text] = "You must be the owner of this work to delete it"
+      redirect_to root_path, status: :bad_request
+    else
+      @work.destroy
+      flash[:status] = :success
+      flash[:result_text] = "Successfully destroyed #{@media_category.singularize} #{@work.id}"
+      redirect_to root_path
+    end
   end
 
   def upvote
@@ -77,14 +98,14 @@ class WorksController < ApplicationController
     end
 
     # Refresh the page to show either the updated vote count
-    # or the error message
+    # or the error messagep
     redirect_back fallback_location: work_path(@work)
   end
 
   private
 
   def media_params
-    params.require(:work).permit(:title, :category, :creator, :description, :publication_year)
+    params.require(:work).permit(:title, :category, :creator, :description, :publication_year, :user_id)
   end
 
   def category_from_work

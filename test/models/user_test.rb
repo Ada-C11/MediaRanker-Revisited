@@ -2,20 +2,25 @@ require "test_helper"
 
 describe User do
   describe "relations" do
+    before do
+      @dan = users(:dan)
+    end
     it "has a list of votes" do
-      dan = users(:dan)
-      dan.must_respond_to :votes
-      dan.votes.each do |vote|
+      @dan.must_respond_to :votes
+      @dan.votes.each do |vote|
         vote.must_be_kind_of Vote
       end
     end
 
     it "has a list of ranked works" do
-      dan = users(:dan)
-      dan.must_respond_to :ranked_works
-      dan.ranked_works.each do |work|
+      @dan.must_respond_to :ranked_works
+      @dan.ranked_works.each do |work|
         work.must_be_kind_of Work
       end
+    end
+
+    it "has many works" do
+      @dan.works.length.must_equal 2
     end
   end
 

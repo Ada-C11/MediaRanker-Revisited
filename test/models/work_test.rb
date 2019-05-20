@@ -2,20 +2,25 @@ require "test_helper"
 
 describe Work do
   describe "relations" do
+    before do
+      @album = works(:album)
+    end
     it "has a list of votes" do
-      album = works(:album)
-      album.must_respond_to :votes
-      album.votes.each do |vote|
+      @album.must_respond_to :votes
+      @album.votes.each do |vote|
         vote.must_be_kind_of Vote
       end
     end
 
     it "has a list of voting users" do
-      album = works(:album)
-      album.must_respond_to :ranking_users
-      album.ranking_users.each do |user|
+      @album.must_respond_to :ranking_users
+      @album.ranking_users.each do |user|
         user.must_be_kind_of User
       end
+    end
+
+    it "belongs to a user" do
+      @album.user.must_equal users(:dan)
     end
   end
 
