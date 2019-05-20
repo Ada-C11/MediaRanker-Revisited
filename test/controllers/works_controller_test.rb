@@ -34,20 +34,32 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
-      get works_path
+    describe "logged in user" do
+      before do
+        perform_login(users(:grace))
+      end
+      it "succeeds when there are works" do
+        get works_path
 
-      must_respond_with :success
-    end
-
-    it "succeeds when there are no works" do
-      Work.all do |work|
-        work.destroy
+        must_respond_with :success
       end
 
+      it "succeeds when there are no works" do
+        Work.all do |work|
+          work.destroy
+        end
+
+        get works_path
+
+        must_respond_with :success
+      end
+    end
+    it "redirects to root_path if no user logged in" do
       get works_path
 
-      must_respond_with :success
+      must_redirect_to root_path
+
+      expect(flash[:status]).must_equal :failure
     end
   end
 
@@ -96,19 +108,32 @@ describe WorksController do
   end
 
   describe "show" do
-    it "succeeds for an extant work ID" do
-      get work_path(existing_work.id)
+    describe "logged in user" do
+      before do
+        perform_login(users(:grace))
+      end
+      it "succeeds for an extant work ID" do
+        get work_path(existing_work.id)
 
-      must_respond_with :success
+        must_respond_with :success
+      end
+
+      it "renders 404 not_found for a bogus work ID" do
+        destroyed_id = existing_work.id
+        existing_work.destroy
+
+        get work_path(destroyed_id)
+
+        must_respond_with :not_found
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      destroyed_id = existing_work.id
-      existing_work.destroy
+    it "redirects to root_path if no user logged in" do
+      get work_path(existing_work.id)
 
-      get work_path(destroyed_id)
+      must_redirect_to root_path
 
-      must_respond_with :not_found
+      expect(flash[:status]).must_equal :failure
     end
   end
 
@@ -189,19 +214,47 @@ describe WorksController do
 
   describe "upvote" do
     it "redirects to the work page if no user is logged in" do
-      skip
+      expect {
+        post upvote_path(existing_work)
+      }.wont_change "existing_work.votes.count"
+
+      must_redirect_to work_path(existing_work)
     end
 
     it "redirects to the work page after the user has logged out" do
-      skip
+      user = users(:grace)
+      perform_login(user)
+      delete logout_path
+
+      expect {
+        post upvote_path(existing_work)
+      }.wont_change "existing_work.votes.count"
+
+      must_redirect_to work_path(existing_work)
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
-      skip
+      user = users(:grace)
+      perform_login(user)
+
+      expect {
+        post upvote_path(existing_work)
+      }.must_change "existing_work.votes.count", 1
+
+      must_redirect_to work_path(existing_work)
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      user = users(:grace)
+      perform_login(user)
+
+      post upvote_path(existing_work)
+
+      expect {
+        post upvote_path(existing_work)
+      }.wont_change "existing_work.votes.count"
+
+      must_redirect_to work_path(existing_work)
     end
   end
 end
