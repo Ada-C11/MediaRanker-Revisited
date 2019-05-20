@@ -28,6 +28,15 @@ describe UsersController do
       session[:user_id].must_equal User.last.id
     end
 
+    it "will redirect back to root with a flash message if username not provided" do
+      user = User.new(provider: "github", uid: 1122, username: "", email: "", name: "user_test_name")
+
+      expect {
+        perform_login(user)
+      }.wont_change "User.count"
+      expect(flash[:error]).must_be_kind_of String
+    end
+
     it "logs out a user" do
       start_count = User.count
       user = users(:grace)
