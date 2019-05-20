@@ -213,7 +213,6 @@ describe WorksController do
 
       expect(session[:user_id]).must_equal user.id
 
-
       total_votes = Vote.all.length
 
       work = works(:poodr)
@@ -224,7 +223,21 @@ describe WorksController do
     end
 
     it "redirects to the work page if the user has already voted for that work" do
-      skip
+      user = users(:ada)
+      perform_login(user)
+
+      expect(session[:user_id]).must_equal user.id
+
+      total_votes = Vote.all.length
+
+      work = works(:poodr)
+      work_votes = work.votes.count
+
+      post upvote_path(work.id)
+      expect(work.votes.count).must_equal work_votes + 1
+      
+      post upvote_path(work.id)
+      expect(flash[:result_text]).must_equal "Could not upvote"
     end
   end
 end
