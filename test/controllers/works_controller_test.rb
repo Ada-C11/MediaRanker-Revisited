@@ -35,6 +35,8 @@ describe WorksController do
 
   describe "index" do
     it "succeeds when there are works" do
+      user = users(:ada)
+      perform_login(user)
       get works_path
 
       must_respond_with :success
@@ -44,6 +46,9 @@ describe WorksController do
       Work.all do |work|
         work.destroy
       end
+      
+      user = users(:ada)
+      perform_login(user)
 
       get works_path
 
@@ -97,6 +102,8 @@ describe WorksController do
 
   describe "show" do
     it "succeeds for an extant work ID" do
+      user = users(:ada)
+      perform_login(user)
       get work_path(existing_work.id)
 
       must_respond_with :success
