@@ -4,14 +4,14 @@ album:
   title: Old Title
   creator: You Create
   description: This is an older album
-  publication_year: 1955-11-01
+  publication_year: 1955
   category: album
 
 another_album:
   title: New Title
   creator: Who Creates
   description: This is a newer album
-  publication_year: 2016-04-08
+  publication_year: 2016
   category: album
 
 poodr:
